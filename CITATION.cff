@@ -1,0 +1,51 @@
+cff-version: 1.2.0
+message: "If you use this software in your research, please cite it as below."
+type: software
+title: "Adaptive Firmware Layer"
+version: "0.1.0"
+date-released: "2026-07-02"
+license: MIT
+url: "https://github.com/fadhilmayati/adaptive-firmware"
+repository: "https://github.com/fadhilmayati/adaptive-firmware"
+keywords:
+  - reconfigurable-computing
+  - adaptive-hardware
+  - reinforcement-learning
+  - FPGA
+  - CGRA
+  - AI-infrastructure
+  - runtime-reconfiguration
+authors:
+  - family-names: "Hardware Engineer"
+    given-names: "Anonymous"
+    affiliation: "Silicon Validation"
+preferred-citation:
+  type: article
+  title: "Silicon That Evolves: An Adaptive Firmware Layer for AI Workloads"
+  year: 2026
+  url: "https://github.com/fadhilmayati/adaptive-firmware"
+references:
+  - type: article
+    title: "DPUConfig: Optimizing ML Inference in FPGAs Using Reinforcement Learning"
+    authors:
+      - family-names: "Patras"
+        given-names: "Alexandros"
+    journal: "DATE 2026"
+    year: 2026
+    url: "https://arxiv.org/abs/2602.12847"
+  - type: article
+    title: "AI-FPGA Agent: A Reconfigurable Framework for AI-FPGA Agent Integration and Acceleration"
+    authors:
+      - family-names: "Yunusoglu"
+        given-names: "Aybars"
+    journal: "ISQED 2026"
+    year: 2026
+    url: "https://arxiv.org/abs/2601.19263"
+  - type: article
+    title: "AI-Augmented Dynamic Partial Reconfiguration for Adaptive Edge Intelligence in FPGA-Based Systems"
+    authors:
+      - family-names: "Yeonjin"
+      - family-names: "Kigarura"
+    journal: "SCCTS J. Embedded Systems Design and Applications"
+    year: 2025
+    url: "https://ecejournals.in/index.php/ESA/article/view/388"

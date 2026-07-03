@@ -1,0 +1,37 @@
+name: Welcome new contributors
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened]
+
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post welcome message
+        uses: actions/first-interaction@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-message: |
+            Thanks for opening your first issue! 👋
+
+            A few things that will help us help you:
+            - What were you trying to do?
+            - What happened instead?
+            - Your Python version, OS, and how you installed (`pip install -e .` vs from PyPI)
+
+            The full story behind this project is in [STATUS.md](STATUS.md).
+            If this is about the underlying research, the verification trace is in
+            [concepts/workload-adaptive-silicon-verification.md](concepts/workload-adaptive-silicon-verification.md).
+          pr-message: |
+            Thanks for your first pull request! 🎉
+
+            A few things to check before we merge:
+            - [ ] Tests pass locally (`python -m pytest tests/ -v`)
+            - [ ] New code has tests
+            - [ ] If you changed the public API, update the docstrings
+            - [ ] If you changed behavior, update the relevant demo script
+
+            The contribution guide is in [CONTRIBUTING.md](CONTRIBUTING.md).
