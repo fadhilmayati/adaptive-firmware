@@ -47,6 +47,8 @@ The benchmark suite sweeps the energy weight from 0.0 (throughput-only) to 1.0 (
 
 The gain is real but narrow. It's biggest when the workload keeps changing AND the reward function balances throughput and energy, not at either extreme. For a single, predictable task, the simple approach is fine. For a production AI serving system with mixed traffic and a realistic SLO, the adaptive approach gives you a small but real edge.
 
+I also added a **compile-time baseline** (`smart_static`) that represents what a static compiler like TVM or TensorRT would produce — profile the workload once at startup, commit to the best config, and never explore again. The result: smart_static matches or beats the profile agent on short workloads (where drift is unlikely), but on `mixed_production` the tabular adaptive agent still wins. The gap is narrow (+1.9%) because this workload has long enough phases for profile-then-commit to work well — but the adaptive agent doesn't need to know phase boundaries in advance.
+
 ## What I learned along the way
 
 Three things became clear:

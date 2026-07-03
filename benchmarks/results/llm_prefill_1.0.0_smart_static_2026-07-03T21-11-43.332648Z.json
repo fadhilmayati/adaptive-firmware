@@ -1,0 +1,29 @@
+{
+  "agent_config": {
+    "energy_weight": 0.0
+  },
+  "agent_name": "smart_static",
+  "avg_reward": 0.5159695374816271,
+  "cache_hit_rate": 0.875,
+  "config_usage": {
+    "0": 10,
+    "1": 10,
+    "2": 10,
+    "3": 2
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 32,
+  "run_time_seconds": 0.000408172607421875,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-03T21:11:43.332648Z",
+  "total_energy_mj": 4.5245184,
+  "total_reconfig_time_ms": 22.0,
+  "total_time_ms": 22.0925568,
+  "workload_name": "llm_prefill",
+  "workload_version": "1.0.0"
+}

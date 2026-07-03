@@ -1,0 +1,26 @@
+{
+  "agent_config": {
+    "energy_weight": 0.0
+  },
+  "agent_name": "smart_static",
+  "avg_reward": 0.42376054279736425,
+  "cache_hit_rate": 0.8333333333333334,
+  "config_usage": {
+    "0": 6
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 6,
+  "run_time_seconds": 6.413459777832031e-05,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-03T21:11:43.331146Z",
+  "total_energy_mj": 1.7982115840000001,
+  "total_reconfig_time_ms": 8.0,
+  "total_time_ms": 8.0629248,
+  "workload_name": "cv_detection",
+  "workload_version": "1.0.0"
+}

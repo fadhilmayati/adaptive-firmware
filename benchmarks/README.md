@@ -10,7 +10,7 @@ The field of adaptive reconfigurable hardware doesn't have a standard benchmark.
 ## Quick start
 
 ```bash
-# Run the full suite (5 workloads × 6 agents = 30 benchmarks)
+# Run the full suite (5 workloads × 8 agents = 40 benchmarks)
 python -m benchmarks.runner
 
 # Run a single workload with a specific agent
@@ -38,6 +38,8 @@ All workloads are seeded and reproducible. Same seed → same traces.
 |-------|-------------|
 | `tabular` | Tabular Q-learning with informed initialization (our baseline) |
 | `neural` | Small NumPy MLP with experience replay and target network |
+| `profile` | Profile-then-commit: profile each config, commit to best, drift-triggered re-profile |
+| `smart_static` | Compile-time baseline: profile at start with ZERO exploration during commit. Represents what TVM/TensorRT would produce |
 | `oracle` | Always picks the best config for the workload class (upper bound) |
 | `static_0` | HIGH_COMPUTE always |
 | `static_1` | HIGH_BANDWIDTH always |
@@ -88,6 +90,8 @@ The benchmark runner takes an `energy_weight` parameter (0.0 to 1.0) that contro
 
 **Key finding from the energy weight sweep**: the adaptive agent's win is NOT monotonic with energy weight. It depends on the specific interaction between the reward shape and the workload characteristics.
 
+**Key finding from the smart_static baseline**: smart_static and profile produce identical results on short workloads where drift is unlikely — both profile each config and commit. On mixed_production, smart_static wins over profile (0.3831 vs 0.3796) because zero exploration avoids the reconfiguration cost of drift-triggered re-profiles. On llm_decode, smart_static ties profile (0.3457 vs 0.3450) — the workload is too homogeneous for either approach to adapt meaningfully.
+
 Sweep results on `mixed_production` (best static vs best adaptive):
 
 | energy_weight | static_3 | best_adaptive | winner | gap |
@@ -106,7 +110,7 @@ The adaptive agent wins at `energy_weight=0.5` (balanced tradeoff) but loses at 
 from benchmarks.runner import BenchmarkRunner
 runner = BenchmarkRunner()
 for ew in [0.0, 0.15, 0.3, 0.5, 0.7, 1.0]:
-    for agent in ['static_2', 'static_3', 'tabular', 'profile']:
+    for agent in ['static_2', 'static_3', 'tabular', 'profile', 'smart_static']:
         r = runner.run('mixed_production', agent=agent, energy_weight=ew)
         print(f'  ew={ew} {agent}: {r.avg_reward:.4f}')
 ```

@@ -175,6 +175,17 @@ class BenchmarkRunner:
                 configs=CONFIG_PRESETS,
                 profile_steps=config.get("profile_steps", 10),
                 energy_weight=energy_weight,
+                commit_epsilon=config.get("commit_epsilon", 0.02),
+            )
+
+        if agent == "smart_static":
+            # Compile-time baseline: profile at start, commit with ZERO exploration.
+            # This is what a static compiler (TVM/TensorRT) would do.
+            return _ProfileMiddleware(
+                configs=CONFIG_PRESETS,
+                profile_steps=config.get("profile_steps", 10),
+                energy_weight=energy_weight,
+                commit_epsilon=0.0,
             )
 
         if agent == "oracle":
@@ -183,7 +194,7 @@ class BenchmarkRunner:
                 energy_weight=energy_weight,
             )
 
-        raise ValueError(f"Unknown agent: {agent!r}. Use tabular, neural, static_N, random, or oracle.")
+        raise ValueError(f"Unknown agent: {agent!r}. Use tabular, neural, static_N, random, profile, smart_static, or oracle.")
 
     def _save(self, result: BenchmarkResult) -> None:
         """Save result to JSON file."""
@@ -246,11 +257,12 @@ class _ProfileMiddleware(AdaptiveMiddleware):
     reconfiguration during commit, drift-triggered re-profiling.
     """
 
-    def __init__(self, configs: list[AcceleratorConfig], profile_steps: int = 10, energy_weight: float = 0.15) -> None:
+    def __init__(self, configs: list[AcceleratorConfig], profile_steps: int = 10, energy_weight: float = 0.15, commit_epsilon: float = 0.02) -> None:
         super().__init__(configs=configs, energy_weight=energy_weight)
         self.profile_agent = ProfileThenCommitAgent(
             configs=configs,
             profile_steps=profile_steps,
+            commit_epsilon=commit_epsilon,
         )
 
     def run_episode(self, traces, tenant_id: str = "default"):
@@ -352,7 +364,7 @@ def run_all(output_dir: str = "benchmarks/results") -> list[BenchmarkResult]:
     runner = BenchmarkRunner(output_dir=output_dir)
     results: list[BenchmarkResult] = []
 
-    agents = ["oracle", "static_2", "static_3", "tabular", "neural", "profile", "random"]
+    agents = ["oracle", "smart_static", "static_2", "static_3", "tabular", "neural", "profile", "random"]
     for spec in list_workloads():
         for agent in agents:
             print(f"  Running {spec.name}@{spec.version} with {agent}...")
