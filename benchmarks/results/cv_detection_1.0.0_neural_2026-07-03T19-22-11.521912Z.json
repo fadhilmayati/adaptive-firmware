@@ -1,0 +1,25 @@
+{
+  "agent_config": {},
+  "agent_name": "neural",
+  "avg_reward": 0.49898599503904134,
+  "cache_hit_rate": 0.6666666666666666,
+  "config_usage": {
+    "0": 2,
+    "2": 4
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 6,
+  "run_time_seconds": 0.0002560615539550781,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-03T19:22:11.521912Z",
+  "total_energy_mj": 2.7689415680000002,
+  "total_reconfig_time_ms": 13.0,
+  "total_time_ms": 13.037469013333332,
+  "workload_name": "cv_detection",
+  "workload_version": "1.0.0"
+}

@@ -23,6 +23,7 @@ from adaptive_firmware.hardware.configs import CONFIG_PRESETS, AcceleratorConfig
 from adaptive_firmware.runtime.middleware import AdaptiveMiddleware
 from adaptive_firmware.agent.rl_agent import ReconfigAgent
 from adaptive_firmware.agent.neural_agent import NeuralReconfigAgent
+from adaptive_firmware.agent.profile_agent import ProfileThenCommitAgent
 
 
 @dataclass
@@ -158,6 +159,12 @@ class BenchmarkRunner:
                 seed=config.get("seed", 42),
             )
 
+        if agent == "profile":
+            return _ProfileMiddleware(
+                configs=CONFIG_PRESETS,
+                profile_steps=config.get("profile_steps", 10),
+            )
+
         if agent == "oracle":
             return _OracleMiddleware(
                 configs=CONFIG_PRESETS,
@@ -213,6 +220,53 @@ class _RandomConfigMiddleware(AdaptiveMiddleware):
                 energy_mj=result.energy_mj,
                 reward=0.0,  # No learning
                 cache_hit=result.cache_hit, drift_detected=False, epsilon=0.0,
+            ))
+        return self._build_report(logs)
+
+
+class _ProfileMiddleware(AdaptiveMiddleware):
+    """Middleware that uses the profile-then-commit agent.
+
+    Profiles each config for `profile_steps` traces, then commits to
+    the best-performing config for the rest of the workload. This is
+    a production-realistic policy: bounded profiling cost, minimal
+    reconfiguration during commit, drift-triggered re-profiling.
+    """
+
+    def __init__(self, configs: list[AcceleratorConfig], profile_steps: int = 10) -> None:
+        super().__init__(configs=configs)
+        self.profile_agent = ProfileThenCommitAgent(
+            configs=configs,
+            profile_steps=profile_steps,
+        )
+
+    def run_episode(self, traces, tenant_id: str = "default"):
+        from adaptive_firmware.observation.telemetry import TelemetryVector
+        from adaptive_firmware.runtime.middleware import StepLog
+        self.reset()
+        self.profile_agent.reset()
+        logs: list[StepLog] = []
+        for step, trace in enumerate(traces):
+            telemetry = self._build_telemetry(trace, tenant_id)
+            action = self.profile_agent.select_action(telemetry)
+            result = self.simulator.execute(
+                flops=trace.flops, memory_bytes=trace.memory_bytes, config_id=action,
+            )
+            reward = self.profile_agent.compute_reward_for_result(result, self.energy_budget)
+            self.profile_agent.update(telemetry, action, reward)
+            config = self.simulator.configs[action]
+            logs.append(StepLog(
+                step=step, tenant_id=tenant_id,
+                op_type=trace.op_type, workload_class=trace.workload_class,
+                selected_config=action, config_name=config.name,
+                exec_time_ms=result.exec_time_ms,
+                reconfig_time_ms=result.reconfig_time_ms,
+                total_time_ms=result.total_time_ms,
+                energy_mj=result.energy_mj,
+                reward=reward,
+                cache_hit=result.cache_hit,
+                drift_detected=False,
+                epsilon=0.0,
             ))
         return self._build_report(logs)
 
@@ -285,7 +339,7 @@ def run_all(output_dir: str = "benchmarks/results") -> list[BenchmarkResult]:
     runner = BenchmarkRunner(output_dir=output_dir)
     results: list[BenchmarkResult] = []
 
-    agents = ["oracle", "static_2", "static_3", "tabular", "neural", "random"]
+    agents = ["oracle", "static_2", "static_3", "tabular", "neural", "profile", "random"]
     for spec in list_workloads():
         for agent in agents:
             print(f"  Running {spec.name}@{spec.version} with {agent}...")

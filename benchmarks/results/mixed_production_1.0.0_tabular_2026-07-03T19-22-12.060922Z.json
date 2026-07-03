@@ -1,0 +1,27 @@
+{
+  "agent_config": {},
+  "agent_name": "tabular",
+  "avg_reward": 0.39172851987767976,
+  "cache_hit_rate": 0.9863447939526945,
+  "config_usage": {
+    "0": 272,
+    "1": 29,
+    "2": 267,
+    "3": 7634
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 3,
+    "unknown": 2
+  },
+  "n_traces": 8202,
+  "run_time_seconds": 0.23093008995056152,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-03T19:22:12.060922Z",
+  "total_energy_mj": 147.51859968,
+  "total_reconfig_time_ms": 662.0,
+  "total_time_ms": 692.2402743626667,
+  "workload_name": "mixed_production",
+  "workload_version": "1.0.0"
+}

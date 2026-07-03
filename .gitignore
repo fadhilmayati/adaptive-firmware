@@ -68,7 +68,9 @@ logs/
 
 # Output artifacts
 output/
-results/
+# Allow benchmark results (they're the canonical output of the benchmark suite)
+!benchmarks/results/
+!benchmarks/results/LEADERBOARD.md
 *.png
 !docs/**/*.png
 !assets/**/*.png

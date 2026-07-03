@@ -1,0 +1,24 @@
+{
+  "agent_config": {},
+  "agent_name": "oracle",
+  "avg_reward": 0.3354169934163152,
+  "cache_hit_rate": 0.99375,
+  "config_usage": {
+    "1": 160
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 160,
+  "run_time_seconds": 0.0034570693969726562,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-03T19:22:11.527621Z",
+  "total_energy_mj": 1.3862630399999998,
+  "total_reconfig_time_ms": 6.0,
+  "total_time_ms": 6.1945120000000005,
+  "workload_name": "llm_decode",
+  "workload_version": "1.0.0"
+}
