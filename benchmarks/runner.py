@@ -76,7 +76,7 @@ class BenchmarkRunner:
         agent: str = "tabular",
         agent_config: dict | None = None,
         workload_version: str | None = None,
-        reward_variant: str = "balanced",
+        energy_weight: float = 0.15,
     ) -> BenchmarkResult:
         """Run a single benchmark and return the result.
 
@@ -85,7 +85,9 @@ class BenchmarkRunner:
             agent: Agent type — "tabular", "neural", "static_0", etc.
             agent_config: Optional agent-specific config overrides.
             workload_version: Optional specific workload version.
-            reward_variant: "balanced" (15% energy) or "throughput" (0% energy).
+            energy_weight: Weight for energy in the reward function (0.0 to 1.0).
+                          0.0 = throughput-only, 1.0 = energy-only,
+                          0.15 = balanced (default).
 
         Returns:
             BenchmarkResult with all metrics.
@@ -100,7 +102,7 @@ class BenchmarkRunner:
             )
 
         start = time.time()
-        mw = self._build_middleware(agent, agent_config or {}, reward_variant)
+        mw = self._build_middleware(agent, agent_config or {}, energy_weight)
         report = mw.run_episode(traces)
         run_time = time.time() - start
 
@@ -110,7 +112,7 @@ class BenchmarkRunner:
             workload_name=spec.name,
             workload_version=spec.version,
             agent_name=agent,
-            agent_config={**(agent_config or {}), "reward_variant": reward_variant},
+            agent_config={**(agent_config or {}), "energy_weight": energy_weight},
             n_traces=report.total_steps,
             avg_reward=report.avg_reward,
             total_time_ms=report.total_time_ms,
