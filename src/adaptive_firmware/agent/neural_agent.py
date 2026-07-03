@@ -308,6 +308,36 @@ class NeuralReconfigAgent:
         self._steps_since_target_update = 0
         self._steps_since_train = 0
 
+        # Warm-start from workload-class priors (same priors as tabular agent)
+        self.warm_start_from_priors()
+
+    def warm_start_from_priors(self) -> None:
+        """Initialize the output layer biases from workload-class Q-table priors.
+
+        The neural network's output is approximately equal to its output-layer
+        bias when the hidden layer is near zero (which it is for random init
+        with small inputs). Setting the bias to the Q-table priors effectively
+        gives the neural agent the same warm-start as the tabular agent.
+
+        We use the BALANCED config (index 2) as the default starting bias
+        because it's the safe choice for unknown workloads. The network then
+        learns to route different inputs to different outputs during training.
+        """
+        priors: dict[str, list[tuple[int, float]]] = {
+            "compute_bound": [(0, 0.7), (2, 0.5), (3, 0.3), (1, 0.2)],
+            "memory_bound":  [(1, 0.7), (2, 0.5), (3, 0.3), (0, 0.2)],
+            "balanced":      [(2, 0.6), (0, 0.5), (1, 0.5), (3, 0.4)],
+            "unknown":       [(2, 0.4), (0, 0.3), (1, 0.3), (3, 0.3)],
+        }
+        # Use the "unknown" workload class prior as the default — it's the
+        # most conservative starting point (no strong preference for any config).
+        default_prior = np.zeros(self.n_actions, dtype=np.float32)
+        for action, score in priors["unknown"]:
+            if action < self.n_actions:
+                default_prior[action] = score
+        self.policy_net.b3[:] = default_prior
+        self.target_net.b3[:] = default_prior
+
     def select_action(self, telemetry: TelemetryVector) -> int:
         """Select a config using epsilon-greedy over the policy network's Q-values."""
         state_vec = np.array(telemetry.to_feature_vector(), dtype=np.float32)
