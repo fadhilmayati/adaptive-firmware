@@ -37,17 +37,15 @@ So I started building it.
 
 I built a small system that sits between your AI code and the chip underneath. It watches what your model is doing, picks the best chip configuration for the moment, and switches when the workload changes. Then it learns from the result, so it gets better over time.
 
-I tested it against the alternative — just picking one configuration and sticking with it.
+I tested it against the alternative — just picking one configuration and sticking with it. The honest result: **the adaptive system wins on heterogeneous workloads, but only in a narrow window of the energy-vs-throughput tradeoff.**
 
-**The headline result: on realistic AI workloads, my system beats the best static choice by 9% to 45%, depending on the workload.**
+The benchmark suite sweeps the energy weight from 0.0 (throughput-only) to 1.0 (energy-only) and reports who wins on each workload:
 
-- Language model generating text: **+9%** faster
-- Long-running token streaming: **+45%** faster
-- Mixed production traffic (the real scenario): **+40%** faster
+- **On `mixed_production`** (the real production scenario), the adaptive agent wins at `energy_weight=0.5` — a balanced tradeoff — beating the best static by **+1.9%**. It loses at every other weight.
+- **On `llm_decode`** (long-running token streaming), static LOW_POWER wins across all energy weights. The workload is too homogeneous for adaptation to pay off.
+- **On short workloads** (vision, audio), static configs win because the exploration cost of adaptation eats the gain.
 
-The gain is biggest when the workload keeps changing — that's where adaptation has the most to work with. For a single, predictable task, the simple approach is fine.
-
-There's one honest caveat: these numbers use a throughput-focused reward. If the system is told to minimize energy at all costs, the static "always use the lowest-power config" approach wins by exploiting that bias. The adaptive system's value is real — but it's only visible when the optimization target matches what you actually care about.
+The gain is real but narrow. It's biggest when the workload keeps changing AND the reward function balances throughput and energy, not at either extreme. For a single, predictable task, the simple approach is fine. For a production AI serving system with mixed traffic and a realistic SLO, the adaptive approach gives you a small but real edge.
 
 ## What I learned along the way
 

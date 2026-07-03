@@ -78,6 +78,39 @@ register_workload(WorkloadSpec(
 2. Add the agent name to `BenchmarkRunner._build_middleware`
 3. Document it in this README
 
+## Reward function: the energy weight sweep
+
+The benchmark runner takes an `energy_weight` parameter (0.0 to 1.0) that controls the tradeoff between throughput and energy in the reward function:
+
+- `energy_weight=0.0` — throughput-only reward
+- `energy_weight=0.15` — balanced (default)
+- `energy_weight=1.0` — energy-only reward
+
+**Key finding from the energy weight sweep**: the adaptive agent's win is NOT monotonic with energy weight. It depends on the specific interaction between the reward shape and the workload characteristics.
+
+Sweep results on `mixed_production` (best static vs best adaptive):
+
+| energy_weight | static_3 | best_adaptive | winner | gap |
+|---------------|----------:|--------------:|--------|----:|
+| 0.00 | 0.3835 | 0.3789 | static | -1.2% |
+| 0.15 | 0.3835 | 0.3790 | static | -1.2% |
+| 0.30 | 0.3835 | 0.3787 | static | -1.3% |
+| **0.50** | **0.3835** | **0.3908** | **adaptive** | **+1.9%** |
+| 0.70 | 0.3835 | 0.3793 | static | -1.1% |
+| 1.00 | 0.3835 | 0.3790 | static | -1.2% |
+
+The adaptive agent wins at `energy_weight=0.5` (balanced tradeoff) but loses at every other weight. On `llm_decode`, static LOW_POWER wins across all energy weights because the workload is too homogeneous for adaptation to pay off.
+
+**How to reproduce:**
+```python
+from benchmarks.runner import BenchmarkRunner
+runner = BenchmarkRunner()
+for ew in [0.0, 0.15, 0.3, 0.5, 0.7, 1.0]:
+    for agent in ['static_2', 'static_3', 'tabular', 'profile']:
+        r = runner.run('mixed_production', agent=agent, energy_weight=ew)
+        print(f'  ew={ew} {agent}: {r.avg_reward:.4f}')
+```
+
 ## Results format
 
 Results are written as JSON to `benchmarks/results/`. Each file contains:
