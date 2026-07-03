@@ -1,0 +1,28 @@
+{
+  "agent_config": {
+    "reward_variant": "balanced"
+  },
+  "agent_name": "tabular",
+  "avg_reward": 0.4487583366680005,
+  "cache_hit_rate": 0.5,
+  "config_usage": {
+    "0": 1,
+    "1": 1,
+    "2": 4
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 6,
+  "run_time_seconds": 0.00031113624572753906,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-03T19:23:42.193379Z",
+  "total_energy_mj": 3.9638051840000004,
+  "total_reconfig_time_ms": 19.0,
+  "total_time_ms": 19.039405653333333,
+  "workload_name": "cv_detection",
+  "workload_version": "1.0.0"
+}

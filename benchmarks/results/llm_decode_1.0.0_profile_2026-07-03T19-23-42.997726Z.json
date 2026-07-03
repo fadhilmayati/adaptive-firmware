@@ -1,0 +1,29 @@
+{
+  "agent_config": {
+    "reward_variant": "throughput"
+  },
+  "agent_name": "profile",
+  "avg_reward": 0.3410322016360944,
+  "cache_hit_rate": 0.9625,
+  "config_usage": {
+    "0": 10,
+    "1": 11,
+    "2": 11,
+    "3": 128
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 160,
+  "run_time_seconds": 0.0030269622802734375,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-03T19:23:42.997726Z",
+  "total_energy_mj": 6.7535872,
+  "total_reconfig_time_ms": 33.0,
+  "total_time_ms": 33.5533056,
+  "workload_name": "llm_decode",
+  "workload_version": "1.0.0"
+}

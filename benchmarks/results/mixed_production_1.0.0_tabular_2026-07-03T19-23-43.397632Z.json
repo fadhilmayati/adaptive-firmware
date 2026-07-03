@@ -1,0 +1,29 @@
+{
+  "agent_config": {
+    "reward_variant": "throughput"
+  },
+  "agent_name": "tabular",
+  "avg_reward": 0.3085742242976258,
+  "cache_hit_rate": 0.9837844428188247,
+  "config_usage": {
+    "0": 271,
+    "1": 7638,
+    "2": 256,
+    "3": 37
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 8202,
+  "run_time_seconds": 0.2891409397125244,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-03T19:23:43.397632Z",
+  "total_energy_mj": 165.810436608,
+  "total_reconfig_time_ms": 740.0,
+  "total_time_ms": 751.4060943146667,
+  "workload_name": "mixed_production",
+  "workload_version": "1.0.0"
+}

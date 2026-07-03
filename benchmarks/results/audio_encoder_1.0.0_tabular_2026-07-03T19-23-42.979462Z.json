@@ -1,0 +1,27 @@
+{
+  "agent_config": {
+    "reward_variant": "throughput"
+  },
+  "agent_name": "tabular",
+  "avg_reward": 0.751388888888889,
+  "cache_hit_rate": 0.6666666666666666,
+  "config_usage": {
+    "0": 1,
+    "2": 5
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 6,
+  "run_time_seconds": 0.00029587745666503906,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-03T19:23:42.979462Z",
+  "total_energy_mj": 2.819375104,
+  "total_reconfig_time_ms": 13.0,
+  "total_time_ms": 13.035737600000001,
+  "workload_name": "audio_encoder",
+  "workload_version": "1.0.0"
+}

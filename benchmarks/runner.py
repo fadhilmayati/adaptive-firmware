@@ -76,6 +76,7 @@ class BenchmarkRunner:
         agent: str = "tabular",
         agent_config: dict | None = None,
         workload_version: str | None = None,
+        reward_variant: str = "balanced",
     ) -> BenchmarkResult:
         """Run a single benchmark and return the result.
 
@@ -84,6 +85,7 @@ class BenchmarkRunner:
             agent: Agent type — "tabular", "neural", "static_0", etc.
             agent_config: Optional agent-specific config overrides.
             workload_version: Optional specific workload version.
+            reward_variant: "balanced" (15% energy) or "throughput" (0% energy).
 
         Returns:
             BenchmarkResult with all metrics.
@@ -98,7 +100,7 @@ class BenchmarkRunner:
             )
 
         start = time.time()
-        mw = self._build_middleware(agent, agent_config or {})
+        mw = self._build_middleware(agent, agent_config or {}, reward_variant)
         report = mw.run_episode(traces)
         run_time = time.time() - start
 
@@ -108,7 +110,7 @@ class BenchmarkRunner:
             workload_name=spec.name,
             workload_version=spec.version,
             agent_name=agent,
-            agent_config=agent_config or {},
+            agent_config={**(agent_config or {}), "reward_variant": reward_variant},
             n_traces=report.total_steps,
             avg_reward=report.avg_reward,
             total_time_ms=report.total_time_ms,
@@ -123,13 +125,16 @@ class BenchmarkRunner:
         self._save(result)
         return result
 
-    def _build_middleware(self, agent: str, config: dict) -> AdaptiveMiddleware:
+    def _build_middleware(self, agent: str, config: dict, reward_variant: str = "balanced") -> AdaptiveMiddleware:
         """Build a middleware instance configured for the given agent."""
+        energy_weight = 0.0 if reward_variant == "throughput" else 0.15
+
         if agent.startswith("static_"):
             config_id = int(agent.split("_")[1])
             mw = AdaptiveMiddleware(
                 configs=CONFIG_PRESETS,
                 cache_capacity=config.get("cache_capacity", 2),
+                energy_weight=energy_weight,
             )
             return _StaticConfigMiddleware(mw, config_id)
 
@@ -139,35 +144,41 @@ class BenchmarkRunner:
                 cache_capacity=config.get("cache_capacity", 2),
                 learning_rate=config.get("learning_rate", 0.25),
                 epsilon_start=config.get("epsilon_start", 0.3),
+                energy_weight=energy_weight,
             )
 
         if agent == "neural":
             return AdaptiveMiddleware(
                 configs=CONFIG_PRESETS,
                 cache_capacity=config.get("cache_capacity", 2),
+                energy_weight=energy_weight,
             )
             # Replace the agent with a neural one
             mw.agent = NeuralReconfigAgent(
                 configs=CONFIG_PRESETS,
                 learning_rate=config.get("learning_rate", 0.005),
                 epsilon_start=config.get("epsilon_start", 0.3),
+                energy_weight=energy_weight,
             )
 
         if agent == "random":
             return _RandomConfigMiddleware(
                 configs=CONFIG_PRESETS,
                 seed=config.get("seed", 42),
+                energy_weight=energy_weight,
             )
 
         if agent == "profile":
             return _ProfileMiddleware(
                 configs=CONFIG_PRESETS,
                 profile_steps=config.get("profile_steps", 10),
+                energy_weight=energy_weight,
             )
 
         if agent == "oracle":
             return _OracleMiddleware(
                 configs=CONFIG_PRESETS,
+                energy_weight=energy_weight,
             )
 
         raise ValueError(f"Unknown agent: {agent!r}. Use tabular, neural, static_N, random, or oracle.")
@@ -194,8 +205,8 @@ class _StaticConfigMiddleware(AdaptiveMiddleware):
 class _RandomConfigMiddleware(AdaptiveMiddleware):
     """Middleware that picks a random config each step."""
 
-    def __init__(self, configs: list[AcceleratorConfig], seed: int = 42) -> None:
-        super().__init__(configs=configs)
+    def __init__(self, configs: list[AcceleratorConfig], seed: int = 42, energy_weight: float = 0.15) -> None:
+        super().__init__(configs=configs, energy_weight=energy_weight)
         import numpy as np
         self._rng = np.random.RandomState(seed)
 
@@ -233,8 +244,8 @@ class _ProfileMiddleware(AdaptiveMiddleware):
     reconfiguration during commit, drift-triggered re-profiling.
     """
 
-    def __init__(self, configs: list[AcceleratorConfig], profile_steps: int = 10) -> None:
-        super().__init__(configs=configs)
+    def __init__(self, configs: list[AcceleratorConfig], profile_steps: int = 10, energy_weight: float = 0.15) -> None:
+        super().__init__(configs=configs, energy_weight=energy_weight)
         self.profile_agent = ProfileThenCommitAgent(
             configs=configs,
             profile_steps=profile_steps,
@@ -285,8 +296,8 @@ class _OracleMiddleware(AdaptiveMiddleware):
         "balanced": 2,       # BALANCED
     }
 
-    def __init__(self, configs: list[AcceleratorConfig]) -> None:
-        super().__init__(configs=configs)
+    def __init__(self, configs: list[AcceleratorConfig], energy_weight: float = 0.15) -> None:
+        super().__init__(configs=configs, energy_weight=energy_weight)
         # Override the agent with a "perfect" policy
         self.agent._last_state = "unknown"
         # Pre-fill Q-table with optimal values

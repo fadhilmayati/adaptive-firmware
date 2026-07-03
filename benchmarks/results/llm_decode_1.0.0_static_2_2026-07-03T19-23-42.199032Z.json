@@ -1,0 +1,26 @@
+{
+  "agent_config": {
+    "reward_variant": "balanced"
+  },
+  "agent_name": "static_2",
+  "avg_reward": 0.26708349670815756,
+  "cache_hit_rate": 0.99375,
+  "config_usage": {
+    "2": 160
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 160,
+  "run_time_seconds": 0.0012230873107910156,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-03T19:23:42.199032Z",
+  "total_energy_mj": 1.20948736,
+  "total_reconfig_time_ms": 5.0,
+  "total_time_ms": 5.389024,
+  "workload_name": "llm_decode",
+  "workload_version": "1.0.0"
+}
