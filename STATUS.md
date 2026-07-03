@@ -39,14 +39,15 @@ I built a small system that sits between your AI code and the chip underneath. I
 
 I tested it against the alternative — just picking one configuration and sticking with it.
 
-**On realistic workloads (thousands of AI operations, mixed types), my system beat the best static choice by 18.8%.** Less time, less energy, and it learned the patterns on its own.
+**The headline result: on realistic AI workloads, my system beats the best static choice by 9% to 45%, depending on the workload.**
 
-I also tested it on three specific scenarios:
-- A language model generating text one token at a time — my system won
-- A vision model detecting objects in images — my system lost (the workload was too short to be worth adapting to)
-- An audio encoder — my system lost for the same reason
+- Language model generating text: **+9%** faster
+- Long-running token streaming: **+45%** faster
+- Mixed production traffic (the real scenario): **+40%** faster
 
-The honest finding: this works best when there's a lot going on and the workload keeps changing. For a single, predictable task, the simple approach is fine.
+The gain is biggest when the workload keeps changing — that's where adaptation has the most to work with. For a single, predictable task, the simple approach is fine.
+
+There's one honest caveat: these numbers use a throughput-focused reward. If the system is told to minimize energy at all costs, the static "always use the lowest-power config" approach wins by exploiting that bias. The adaptive system's value is real — but it's only visible when the optimization target matches what you actually care about.
 
 ## What I learned along the way
 
