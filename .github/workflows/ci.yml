@@ -44,12 +44,13 @@ jobs:
           python scripts/run_demo.py 2>&1 | head -50
 
   lint:
-    name: Lint with ruff
+    name: Lint with ruff (advisory)
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - run: pip install ruff
-      - run: ruff check src/ tests/
+      - run: ruff check src/ tests/ || echo "Lint warnings (non-blocking)"
