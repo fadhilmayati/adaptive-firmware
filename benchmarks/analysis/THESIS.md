@@ -18,17 +18,17 @@ metric in [0, 1].
 
 | Switch Prob | Heterogeneity | Best Adaptive | Agent | Best Static | Agent | Delta | Winner |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-|        0.00 |        0.0000 |        0.9883 |            ucb |      0.7684 |       static_2 | +0.2199 | adaptive |
-|        0.01 |        0.0080 |        0.7876 |            ucb |      0.6063 |       static_2 | +0.1813 | adaptive |
-|        0.02 |        0.0180 |        0.7698 |            ucb |      0.5937 |       static_2 | +0.1761 | adaptive |
-|        0.05 |        0.0470 |        0.7169 |            ucb |      0.5494 |       static_2 | +0.1675 | adaptive |
-|        0.10 |        0.1011 |        0.7466 |            ucb |      0.5795 |       static_2 | +0.1671 | adaptive |
-|        0.15 |        0.1572 |        0.7342 |            ucb |      0.5726 |       static_2 | +0.1617 | adaptive |
-|        0.20 |        0.1942 |        0.7622 |            ucb |      0.5914 |       static_2 | +0.1708 | adaptive |
-|        0.30 |        0.3033 |        0.7490 |            ucb |      0.5842 |       static_2 | +0.1648 | adaptive |
-|        0.50 |        0.5155 |        0.7206 |      ucb_cache |      0.5682 |       static_2 | +0.1523 | adaptive |
-|        0.75 |        0.7558 |        0.7253 |        tabular |      0.5639 |       static_2 | +0.1613 | adaptive |
-|        1.00 |        1.0000 |        0.7256 |            ucb |      0.5673 |       static_2 | +0.1583 | adaptive |
+|        0.00 |        0.0000 |        0.9890 |            ucb |      0.7684 |       static_2 | +0.2206 | adaptive |
+|        0.01 |        0.0080 |        0.7877 |            ucb |      0.6063 |       static_2 | +0.1814 | adaptive |
+|        0.02 |        0.0180 |        0.7703 |            ucb |      0.5937 |       static_2 | +0.1765 | adaptive |
+|        0.05 |        0.0470 |        0.7145 |            ucb |      0.5494 |       static_2 | +0.1652 | adaptive |
+|        0.10 |        0.1011 |        0.7502 |            ucb |      0.5795 |       static_2 | +0.1708 | adaptive |
+|        0.15 |        0.1572 |        0.7372 |            ucb |      0.5726 |       static_2 | +0.1647 | adaptive |
+|        0.20 |        0.1942 |        0.7570 |            ucb |      0.5914 |       static_2 | +0.1657 | adaptive |
+|        0.30 |        0.3033 |        0.7448 |        tabular |      0.5842 |       static_2 | +0.1607 | adaptive |
+|        0.50 |        0.5155 |        0.7327 |            ucb |      0.5682 |       static_2 | +0.1644 | adaptive |
+|        0.75 |        0.7558 |        0.7283 |        tabular |      0.5639 |       static_2 | +0.1643 | adaptive |
+|        1.00 |        1.0000 |        0.7290 |        tabular |      0.5673 |       static_2 | +0.1617 | adaptive |
 
 **Crossover point**: heterogeneity = 0.0000
 
@@ -47,11 +47,11 @@ advantage for adaptation. This is the best-case scenario for adaptive reconfigur
 |   smart_static |     0.9777 |
 |       static_2 |     0.7684 |
 |       static_3 |     0.5622 |
-|            ucb |     0.9883 |
-|      ucb_cache |     0.9844 |
-|        tabular |     0.9564 |
-|         neural |     0.8546 |
-|        profile |     0.9683 |
+|            ucb |     0.9890 |
+|      ucb_cache |     0.9857 |
+|        tabular |     0.9609 |
+|         neural |     0.8385 |
+|        profile |     0.9673 |
 |         random |     0.0000 |
 
 **Heterogeneity = 1.0000** (switch_prob = 1.00)
@@ -62,11 +62,11 @@ advantage for adaptation. This is the best-case scenario for adaptive reconfigur
 |   smart_static |     0.6241 |
 |       static_2 |     0.5673 |
 |       static_3 |     0.4990 |
-|            ucb |     0.7256 |
-|      ucb_cache |     0.7226 |
-|        tabular |     0.7219 |
-|         neural |     0.6041 |
-|        profile |     0.6172 |
+|            ucb |     0.7286 |
+|      ucb_cache |     0.7256 |
+|        tabular |     0.7290 |
+|         neural |     0.6157 |
+|        profile |     0.6191 |
 |         random |     0.0000 |
 
 ---
@@ -81,33 +81,33 @@ real or just noise.
 
 | Agent | Mean Reward | Std | 95% CI | Time (ms) | Energy (mJ) | Cache Hit |
 | --- | --- | --- | --- | --- | --- | --- |
-|        tabular |      0.3730 | 0.0219 |  0.0111 |    721.23 |      158.15 |     98.3% |
-|            ucb |      0.3865 | 0.0076 |  0.0038 |   1309.59 |      272.31 |     96.7% |
-|      ucb_cache |      0.3872 | 0.0065 |  0.0033 |    526.32 |      115.88 |     98.8% |
+|        tabular |      0.3669 | 0.0242 |  0.0122 |    736.34 |      161.64 |     98.3% |
+|            ucb |      0.3861 | 0.0125 |  0.0063 |   1245.38 |      259.78 |     96.9% |
+|      ucb_cache |      0.3859 | 0.0083 |  0.0042 |    513.45 |      113.62 |     98.8% |
 |   smart_static |      0.3419 | 0.0562 |  0.0284 |     52.04 |       19.32 |     99.9% |
 |       static_3 |      0.3866 | 0.0036 |  0.0018 |     32.82 |       10.73 |    100.0% |
 |         oracle |      0.3738 | 0.0089 |  0.0045 |    337.65 |       83.23 |     99.3% |
 |      lookahead |      0.4039 | 0.0080 |  0.0040 |    247.23 |       59.99 |     99.4% |
 
-**Tabular vs static_3**: t = -2.363, p = 0.0181 (significant)
+**Tabular vs static_3**: t = -3.127, p = 0.0018 (significant)
 
-**Smart_static vs tabular**: t = -1.997, p = 0.0458 (significant)
+**Smart_static vs tabular**: t = -1.578, p = 0.1145 (not significant)
 
 ### llm_decode
 
 | Agent | Mean Reward | Std | 95% CI | Time (ms) | Energy (mJ) | Cache Hit |
 | --- | --- | --- | --- | --- | --- | --- |
-|        tabular |      0.2971 | 0.0117 |  0.0059 |    118.28 |       23.77 |     86.8% |
-|            ucb |      0.2288 | 0.0249 |  0.0126 |    283.36 |       56.78 |     66.0% |
-|      ucb_cache |      0.2843 | 0.0117 |  0.0059 |    115.50 |       23.19 |     86.6% |
+|        tabular |      0.2948 | 0.0118 |  0.0060 |    122.13 |       24.54 |     86.1% |
+|            ucb |      0.2280 | 0.0181 |  0.0092 |    278.88 |       55.89 |     66.6% |
+|      ucb_cache |      0.2832 | 0.0061 |  0.0031 |    119.97 |       24.09 |     85.9% |
 |   smart_static |      0.3457 | 0.0000 |  0.0000 |     22.56 |        4.55 |     97.5% |
 |       static_3 |      0.3690 | 0.0000 |  0.0000 |      3.58 |        0.74 |     99.4% |
 |         oracle |      0.3354 | 0.0000 |  0.0000 |      6.19 |        1.39 |     99.4% |
 |      lookahead |      0.3690 | 0.0000 |  0.0000 |      3.58 |        0.74 |     99.4% |
 
-**Tabular vs static_3**: t = -23.827, p = 0.0000 (significant)
+**Tabular vs static_3**: t = -24.312, p = 0.0000 (significant)
 
-**Smart_static vs tabular**: t = 16.106, p = 0.0000 (significant)
+**Smart_static vs tabular**: t = 16.679, p = 0.0000 (significant)
 
 ---
 
@@ -119,16 +119,16 @@ and track the crossover where adaptive advantage disappears.
 
 | Mult | Best Adaptive | Best Static | Delta | Winner |
 | --- | --- | --- | --- | --- |
-|  0.05 |         0.7617 |       0.5843 |  +0.1774 | adaptive |
-|  0.10 |         0.7542 |       0.5843 |  +0.1698 | adaptive |
-|  0.20 |         0.7514 |       0.5843 |  +0.1670 | adaptive |
-|  0.50 |         0.7514 |       0.5843 |  +0.1672 | adaptive |
-|  1.00 |         0.7476 |       0.5842 |  +0.1634 | adaptive |
-|  2.00 |         0.7478 |       0.5842 |  +0.1636 | adaptive |
-|  5.00 |         0.7530 |       0.5842 |  +0.1688 | adaptive |
-| 10.00 |         0.7463 |       0.5842 |  +0.1621 | adaptive |
-| 20.00 |         0.7502 |       0.5842 |  +0.1660 | adaptive |
-| 50.00 |         0.7499 |       0.5842 |  +0.1657 | adaptive |
+|  0.05 |         0.7587 |       0.5843 |  +0.1744 | adaptive |
+|  0.10 |         0.7560 |       0.5843 |  +0.1717 | adaptive |
+|  0.20 |         0.7527 |       0.5843 |  +0.1684 | adaptive |
+|  0.50 |         0.7524 |       0.5843 |  +0.1681 | adaptive |
+|  1.00 |         0.7525 |       0.5842 |  +0.1683 | adaptive |
+|  2.00 |         0.7531 |       0.5842 |  +0.1689 | adaptive |
+|  5.00 |         0.7562 |       0.5842 |  +0.1720 | adaptive |
+| 10.00 |         0.7490 |       0.5842 |  +0.1648 | adaptive |
+| 20.00 |         0.7467 |       0.5842 |  +0.1626 | adaptive |
+| 50.00 |         0.7477 |       0.5842 |  +0.1636 | adaptive |
 
 **No crossover found** — adaptive maintains advantage across all multipliers.
 
@@ -196,10 +196,84 @@ A negative gap means the agent is worse than the best static.
 Based on the four analyses above, we can now state the thesis with quantified bounds:
 
 - **On synthetic workloads with well-separated config classes**, adaptive agents beat static at ALL heterogeneity levels. Each workload class maps to a clearly different optimal accelerator config, so even minimal switching creates an advantage. This is a best-case scenario for adaptation.
-- **On mixed_production**, the tabular adaptive agent (0.3730 ± 0.0219) loses to the static_3 config (0.3866 ± 0.0036). This difference is statistically significant (p = 0.0181, t = -2.363).
-- **On llm_decode**, the tabular adaptive agent (0.2971 ± 0.0117) loses to the static_3 config (0.3690 ± 0.0000). This difference is statistically significant (p = 0.0000, t = -23.827).
+- **On mixed_production**, the tabular adaptive agent (0.3669 ± 0.0242) loses to the static_3 config (0.3866 ± 0.0036). This difference is statistically significant (p = 0.0018, t = -3.127).
+- **On llm_decode**, the tabular adaptive agent (0.2948 ± 0.0118) loses to the static_3 config (0.3690 ± 0.0000). This difference is statistically significant (p = 0.0000, t = -24.312).
 - **Adaptive agents score below the best static on average** (mean oracle gap = -0.515). Even though the look-ahead oracle shows genuine headroom exists on some workloads, learning agents' exploration overhead and slow convergence outweigh the potential benefit. This suggests the learning algorithms (tabular Q-learning, neural bandit) need improvement more than the hardware design does.
 - **On homogeneous workloads (llm_decode type)**, no adaptive agent beats the best static configuration, regardless of reconfiguration cost or energy weight. Adaptation is strictly unnecessary when the workload doesn't change.
+
+---
+
+## 5. CGRA Architecture: What Happens When Reconfiguration Is Free?
+
+The analyses above use an FPGA-style model where bitstream loading takes 3–8 ms.
+CGRA (Coarse-Grained Reconfigurable Array) is a fundamentally different architecture:
+reconfiguration happens in a single cycle (~1 ns), so the penalty for switching
+is effectively zero. This section repeats the heterogeneity and multi-seed analyses
+using CGRA accelerator configs with cycle-level reconfiguration to see how the
+adaptive vs static tradeoff changes.
+
+### CGRA Heterogeneity Sweep
+
+| Switch Prob | Heterogeneity | Best Adaptive | Agent | Best Static | Agent | Delta | Winner |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+|        0.00 |        0.0000 |        0.9665 |            ucb |      0.7965 |       static_2 | +0.1701 | adaptive |
+|        0.01 |        0.0080 |        0.7627 |        tabular |      0.6143 |       static_2 | +0.1483 | adaptive |
+|        0.02 |        0.0180 |        0.7496 |        tabular |      0.6003 |       static_2 | +0.1493 | adaptive |
+|        0.05 |        0.0470 |        0.6934 |        tabular |      0.5505 |       static_2 | +0.1429 | adaptive |
+|        0.10 |        0.1011 |        0.7331 |        tabular |      0.5843 |       static_2 | +0.1488 | adaptive |
+|        0.15 |        0.1572 |        0.7241 |        tabular |      0.5765 |       static_2 | +0.1476 | adaptive |
+|        0.20 |        0.1942 |        0.7446 |        tabular |      0.5977 |       static_2 | +0.1470 | adaptive |
+|        0.30 |        0.3033 |        0.7364 |        tabular |      0.5897 |       static_2 | +0.1467 | adaptive |
+|        0.50 |        0.5155 |        0.7165 |        tabular |      0.5716 |       static_2 | +0.1448 | adaptive |
+|        0.75 |        0.7558 |        0.7124 |        tabular |      0.5667 |       static_2 | +0.1458 | adaptive |
+|        1.00 |        1.0000 |        0.7184 |        tabular |      0.5705 |       static_2 | +0.1479 | adaptive |
+
+**FPGA crossover**: heterogeneity = 0.0000
+
+
+**CGRA crossover**: heterogeneity = 0.0000
+
+
+**Key result**: On CGRA, adaptive agents beat static at ALL heterogeneity levels. 
+With near-zero reconfiguration cost, there is no downside to switching — the agent can 
+always pick the best config for the current workload without paying a penalty. 
+The crossover threshold vanishes entirely.
+
+### CGRA Multi-Seed Confidence Intervals
+
+#### mixed_production
+
+| Agent | Mean Reward | Std | 95% CI | Time (ms) | Energy (mJ) | Cache Hit |
+| --- | --- | --- | --- | --- | --- | --- |
+|        tabular |      0.3886 | 0.0065 |  0.0033 |     35.12 |       12.10 |     99.9% |
+|            ucb |      0.3814 | 0.0060 |  0.0030 |     32.58 |       12.11 |     99.9% |
+|      ucb_cache |      0.3822 | 0.0059 |  0.0030 |     33.38 |       11.92 |     99.9% |
+|   smart_static |      0.3355 | 0.0471 |  0.0238 |     25.57 |       11.67 |     99.9% |
+|       static_3 |      0.3747 | 0.0032 |  0.0016 |     37.43 |        8.71 |    100.0% |
+|         oracle |      0.3519 | 0.0086 |  0.0043 |      7.61 |       13.95 |     99.3% |
+|      lookahead |      0.3922 | 0.0074 |  0.0037 |     33.83 |       12.41 |     99.6% |
+
+### FPGA vs CGRA: Direct Comparison
+
+| Agent | FPGA Reward | CGRA Reward | Delta | FPGA Cache | CGRA Cache |
+| --- | --- | --- | --- | --- | --- |
+|        tabular |      0.3669 |      0.3886 |  -0.0218 |      98.3% |      99.9% |
+|            ucb |      0.3861 |      0.3814 |  +0.0047 |      96.9% |      99.9% |
+|      ucb_cache |      0.3859 |      0.3822 |  +0.0037 |      98.8% |      99.9% |
+|   smart_static |      0.3419 |      0.3355 |  +0.0065 |      99.9% |      99.9% |
+|       static_3 |      0.3866 |      0.3747 |  +0.0119 |     100.0% |     100.0% |
+|      lookahead |      0.4039 |      0.3922 |  +0.0117 |      99.4% |      99.6% |
+
+**Oracle gap analysis**:
+
+- FPGA: look-ahead oracle achieves 0.4039 vs best static 0.3866 (headroom = 0.0174, 4.5%)
+- CGRA: look-ahead oracle achieves 0.3922 vs best static 0.3747 (headroom = 0.0175, 4.7%)
+
+**Interpretation**: On FPGA, the majority of the oracle headroom is consumed by 
+reconfiguration overhead — the look-ahead oracle uses cache-aware planning to minimize this, but the overhead still limits the theoretical upper bound. On CGRA, 
+the near-zero reconfiguration cost eliminates this overhead, so the oracle can switch freely at every trace boundary. If the CGRA headroom is larger than FPGA, it means the hardware bottleneck shifted from reconfiguration cost to agent 
+learning quality.
+
 
 ### Key open questions
 

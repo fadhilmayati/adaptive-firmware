@@ -29,6 +29,7 @@ from .engine import (
     _wrap_lookahead,
 )
 from adaptive_firmware.hardware.configs import CONFIG_PRESETS
+from adaptive_firmware.hardware.cgra_configs import CGRA_PRESETS, CGRA_CACHE_CAPACITY
 from benchmarks.workloads.registry import get_workload
 
 
@@ -41,6 +42,7 @@ REPORT_PATH = Path(__file__).parent / "THESIS.md"
 def run_heterogeneity_sweep(
     switch_probs: list[float] | None = None,
     n_traces: int = 1000,
+    use_cgra: bool = False,
 ) -> tuple[dict[float, dict[str, float]], dict[float, float], float]:
     """Sweep switch probability and measure adaptive vs static advantage.
 
@@ -65,7 +67,7 @@ def run_heterogeneity_sweep(
             seed=42, n_traces=n_traces, switch_prob=sp,
         )
         het = compute_heterogeneity(traces)
-        results = run_all_agents_on_traces(traces, seed=42)
+        results = run_all_agents_on_traces(traces, seed=42, use_cgra=use_cgra)
 
         # Best adaptive agent (among learning agents + ucb variants)
         adaptive_agents = ["tabular", "neural", "profile", "smart_static", "ucb", "ucb_cache"]
@@ -119,6 +121,7 @@ def run_multi_seed_analysis(
     agents: list[str],
     n_seeds: int = 20,
     energy_weight: float = 0.15,
+    use_cgra: bool = False,
 ) -> dict[str, dict]:
     """Run multiple seeds for statistical confidence.
 
@@ -138,7 +141,7 @@ def run_multi_seed_analysis(
 
         for seed in range(1, n_seeds + 1):
             traces = spec.trace_generator(seed)
-            r = run_agent_on_traces(agent, traces, energy_weight=energy_weight, seed=seed)
+            r = run_agent_on_traces(agent, traces, energy_weight=energy_weight, seed=seed, use_cgra=use_cgra)
             rewards.append(r.avg_reward)
             times.append(r.total_time_ms)
             energies.append(r.total_energy_mj)
@@ -204,6 +207,7 @@ def run_reconfig_sweep(
     multipliers: list[float] | None = None,
     switch_prob: float = 0.3,
     n_traces: int = 1000,
+    use_cgra: bool = False,
 ) -> dict[float, dict[str, float]]:
     """Sweep reconfiguration time multiplier and measure impact."""
     if multipliers is None:
@@ -213,7 +217,7 @@ def run_reconfig_sweep(
     traces = generate_synthetic_workload(seed=42, n_traces=n_traces, switch_prob=switch_prob)
 
     for m in multipliers:
-        results = run_all_agents_on_traces(traces, reconfig_multiplier=m, seed=42)
+        results = run_all_agents_on_traces(traces, reconfig_multiplier=m, seed=42, use_cgra=use_cgra)
 
         adaptive_agents = ["tabular", "neural", "profile", "smart_static", "ucb", "ucb_cache"]
         adaptive_best = max(results[a].avg_reward for a in adaptive_agents)
@@ -244,6 +248,7 @@ def run_reconfig_sweep(
 
 def compute_all_oracle_gaps(
     existing_results: list[dict] | None = None,
+    use_cgra: bool = False,
 ) -> list[dict]:
     """Compute oracle gap using the look-ahead oracle as the true upper bound.
 
@@ -254,6 +259,7 @@ def compute_all_oracle_gaps(
     Args:
         existing_results: Existing benchmark results (agent rewards). If None,
                           loads from the default results directory.
+        use_cgra: Use CGRA accelerator configs instead of FPGA.
 
     Returns:
         List of dicts with workload, agent, reward, best_static, oracle, gap.
@@ -274,13 +280,15 @@ def compute_all_oracle_gaps(
     for (wl_name, _), entry in best_by_key.items():
         by_workload.setdefault(wl_name, []).append(entry)
 
+    config_presets = CGRA_PRESETS if use_cgra else CONFIG_PRESETS
+
     gaps: list[dict] = []
     for workload, entries in by_workload.items():
         # Run the look-ahead oracle on this workload for the true upper bound
         try:
             spec = get_workload(workload)
             traces = spec.generate()
-            mw = _wrap_lookahead(CONFIG_PRESETS)
+            mw = _wrap_lookahead(config_presets)
             report = mw.run_episode(traces)
             oracle_reward = report.avg_reward
         except Exception as exc:
@@ -339,6 +347,8 @@ def generate_report(
     multi_seed: dict,
     reconfig_sweep: dict,
     oracle_gaps: list[dict],
+    cgra_het_sweep: tuple | None = None,
+    cgra_multi_seed: dict | None = None,
 ) -> str:
     """Generate the complete thesis report."""
     sweep_data, best_static_per_het, crossover = het_sweep
@@ -683,6 +693,150 @@ def generate_report(
 
     lines.extend(thesis_points)
 
+    # ─── CGRA comparison ─────────────────────────────────────────────────
+    if cgra_het_sweep is not None:
+        cgra_sweep_data, _, cgra_crossover = cgra_het_sweep
+        lines.extend([
+            "",
+            "---",
+            "",
+            "## 5. CGRA Architecture: What Happens When Reconfiguration Is Free?",
+            "",
+            "The analyses above use an FPGA-style model where bitstream loading takes 3–8 ms.",
+            "CGRA (Coarse-Grained Reconfigurable Array) is a fundamentally different architecture:",
+            "reconfiguration happens in a single cycle (~1 ns), so the penalty for switching",
+            "is effectively zero. This section repeats the heterogeneity and multi-seed analyses",
+            "using CGRA accelerator configs with cycle-level reconfiguration to see how the",
+            "adaptive vs static tradeoff changes.",
+            "",
+        ])
+
+        # CGRA heterogeneity sweep table
+        lines.append("### CGRA Heterogeneity Sweep\n")
+        cgra_het_rows = []
+        for het in sorted(cgra_sweep_data.keys()):
+            d = cgra_sweep_data[het]
+            cgra_het_rows.append([
+                d["switch_prob"],
+                het,
+                d["adaptive_best"],
+                d["adaptive_agent"],
+                d["static_best"],
+                d["static_agent"],
+                d["delta"],
+                d["winner"],
+            ])
+
+        lines.append(format_table(
+            ["Switch Prob", "Heterogeneity", "Best Adaptive", "Agent", "Best Static", "Agent", "Delta", "Winner"],
+            cgra_het_rows,
+            "{:>11.2f} | {:>13.4f} | {:>13.4f} | {:>14s} | {:>11.4f} | {:>14s} | {:>+7.4f} | {:>6s}",
+        ))
+        lines.append("")
+
+        # Compare FPGA vs CGRA crossover
+        fpga_crossover = crossover
+        lines.append(
+            f"**FPGA crossover**: heterogeneity = {fpga_crossover:.4f}\n\n"
+            if fpga_crossover is not None
+            else "**FPGA**: No crossover found\n\n"
+        )
+        lines.append(
+            f"**CGRA crossover**: heterogeneity = {cgra_crossover:.4f}\n\n"
+            if cgra_crossover is not None
+            else "**CGRA**: No crossover found\n\n"
+        )
+
+        if cgra_crossover is not None and cgra_crossover == 0.0:
+            lines.extend([
+                "**Key result**: On CGRA, adaptive agents beat static at ALL heterogeneity levels. ",
+                "With near-zero reconfiguration cost, there is no downside to switching — the agent can ",
+                "always pick the best config for the current workload without paying a penalty. ",
+                "The crossover threshold vanishes entirely.\n",
+            ])
+        elif cgra_crossover is not None and fpga_crossover is not None:
+            lines.extend([
+                f"**Key result**: CGRA shifts the crossover from heterogeneity = {fpga_crossover:.4f} ",
+                f"(FPGA) to {cgra_crossover:.4f} (CGRA). The lower reconfiguration cost means adaptation ",
+                "becomes worthwhile at lower heterogeneity levels.\n",
+            ])
+
+        # CGRA multi-seed comparison
+        if cgra_multi_seed is not None:
+            lines.append("### CGRA Multi-Seed Confidence Intervals\n")
+
+            for wl_name in cgra_multi_seed:
+                lines.append(f"#### {wl_name}\n")
+                ms_rows = []
+                for agent, data in cgra_multi_seed[wl_name].items():
+                    ms_rows.append([
+                        agent,
+                        data["mean"],
+                        data["std"],
+                        data["ci95"],
+                        data["mean_time"],
+                        data["mean_energy"],
+                        data["mean_cache"],
+                    ])
+                lines.append(format_table(
+                    ["Agent", "Mean Reward", "Std", "95% CI", "Time (ms)", "Energy (mJ)", "Cache Hit"],
+                    ms_rows,
+                    "{:>14s} | {:>11.4f} | {:>5.4f} | {:>7.4f} | {:>9.2f} | {:>11.2f} | {:>9.1%}",
+                ))
+                lines.append("")
+
+            # FPGA vs CGRA comparison for key agents
+            lines.append("### FPGA vs CGRA: Direct Comparison\n")
+            if "mixed_production" in multi_seed and "mixed_production" in cgra_multi_seed:
+                fpga_wl = multi_seed["mixed_production"]
+                cgra_wl = cgra_multi_seed["mixed_production"]
+                comparison_rows = []
+                for agent in ["tabular", "ucb", "ucb_cache", "smart_static", "static_3", "lookahead"]:
+                    if agent in fpga_wl and agent in cgra_wl:
+                        f = fpga_wl[agent]
+                        c = cgra_wl[agent]
+                        comparison_rows.append([
+                            agent,
+                            f["mean"], c["mean"],
+                            f["mean"] - c["mean"],
+                            f["mean_cache"], c["mean_cache"],
+                        ])
+                lines.append(format_table(
+                    ["Agent", "FPGA Reward", "CGRA Reward", "Delta", "FPGA Cache", "CGRA Cache"],
+                    comparison_rows,
+                    "{:>14s} | {:>11.4f} | {:>11.4f} | {:>+8.4f} | {:>10.1%} | {:>10.1%}",
+                ))
+                lines.append("")
+
+                # Synthesis
+                # Check oracle gap on CGRA
+                cgra_lookahead = cgra_wl.get("lookahead", {})
+                cgra_static3 = cgra_wl.get("static_3", {})
+                fpga_lookahead = fpga_wl.get("lookahead", {})
+                fpga_static3 = fpga_wl.get("static_3", {})
+
+                if all(k in d for d in [cgra_lookahead, cgra_static3, fpga_lookahead, fpga_static3] for k in ["mean"]):
+                    cgra_headroom = cgra_lookahead["mean"] - cgra_static3["mean"]
+                    fpga_headroom = fpga_lookahead["mean"] - fpga_static3["mean"]
+                    lines.extend([
+                        "**Oracle gap analysis**:\n",
+                        f"- FPGA: look-ahead oracle achieves {fpga_lookahead['mean']:.4f} vs "
+                        f"best static {fpga_static3['mean']:.4f} (headroom = {fpga_headroom:.4f}, "
+                        f"{fpga_headroom/fpga_static3['mean']*100:.1f}%)",
+                        f"- CGRA: look-ahead oracle achieves {cgra_lookahead['mean']:.4f} vs "
+                        f"best static {cgra_static3['mean']:.4f} (headroom = {cgra_headroom:.4f}, "
+                        f"{cgra_headroom/cgra_static3['mean']*100:.1f}%)",
+                        "",
+                        "**Interpretation**: On FPGA, the majority of the oracle headroom is consumed by ",
+                        "reconfiguration overhead — the look-ahead oracle uses cache-aware planning to "
+                        "minimize this, but the overhead still limits the theoretical upper bound. On CGRA, ",
+                        "the near-zero reconfiguration cost eliminates this overhead, so the oracle can "
+                        "switch freely at every trace boundary. If the CGRA headroom is larger than FPGA, "
+                        "it means the hardware bottleneck shifted from reconfiguration cost to agent ",
+                        "learning quality.",
+                        "",
+                    ])
+
     lines.extend([
         "",
         "### Key open questions",
@@ -707,11 +861,13 @@ def main() -> None:
     """Run all analyses and generate the thesis report."""
     t_start = time.time()
     print("=" * 60)
-    print("Sharp Thesis Analysis")
+    print("Sharp Thesis Analysis (FPGA + CGRA)")
     print("=" * 60)
 
+    # ─── FPGA Analyses ───────────────────────────────────────────────────
+
     # 1. Heterogeneity sweep
-    print("\n[1/4] Running heterogeneity sweep...")
+    print("\n[1/4] Running FPGA heterogeneity sweep...")
     het_start = time.time()
     het_sweep = run_heterogeneity_sweep()
     elapsed = time.time() - het_start
@@ -723,7 +879,7 @@ def main() -> None:
         print("  No crossover found")
 
     # 2. Multi-seed confidence intervals
-    print("\n[2/4] Running multi-seed analysis...")
+    print("\n[2/4] Running FPGA multi-seed analysis...")
     ms_start = time.time()
 
     # Try to import scipy for proper t-test
@@ -758,7 +914,7 @@ def main() -> None:
         print(f"  {m:5.2f}x: adaptive={d['adaptive_best']:.4f} static={d['static_best']:.4f} delta={d['delta']:+.4f} → {d['winner']}")
 
     # 4. Oracle gap
-    print("\n[4/4] Computing oracle gaps...")
+    print("\n[4/4] Computing FPGA oracle gaps...")
     og_start = time.time()
     existing = load_existing_results()
     print(f"  Loaded {len(existing)} existing results")
@@ -771,10 +927,45 @@ def main() -> None:
         mean_gap = float(np.mean([g["gap"] for g in valid]))
         print(f"  Mean oracle gap: {mean_gap:.3f}")
 
+    # ─── CGRA Analyses ──────────────────────────────────────────────────
+
+    print("\n" + "=" * 60)
+    print("CGRA Analysis")
+    print("=" * 60)
+
+    # CGRA heterogeneity sweep
+    print("\n[CGRA 1/2] Running CGRA heterogeneity sweep...")
+    cgra_het_start = time.time()
+    cgra_het_sweep = run_heterogeneity_sweep(use_cgra=True)
+    elapsed = time.time() - cgra_het_start
+    print(f"  Done in {elapsed:.1f}s")
+    cgra_sweep_data, _, cgra_crossover = cgra_het_sweep
+    if cgra_crossover:
+        print(f"  Crossover at heterogeneity = {cgra_crossover:.4f}")
+    else:
+        print("  No crossover found")
+
+    # CGRA multi-seed
+    print("\n[CGRA 2/2] Running CGRA multi-seed analysis...")
+    cgra_ms_start = time.time()
+    cgra_multi_seed: dict[str, dict] = {}
+    for wl_name, agents in [
+        ("mixed_production", ["tabular", "ucb", "ucb_cache", "smart_static", "static_3", "oracle", "lookahead"]),
+    ]:
+        print(f"  Running {wl_name} with {agents}...")
+        ms_data = run_multi_seed_analysis(wl_name, agents, n_seeds=15, use_cgra=True)
+        cgra_multi_seed[wl_name] = ms_data
+        for agent, d in ms_data.items():
+            print(f"    {agent}: {d['mean']:.4f} ± {d['std']:.4f} (95% CI: ±{d['ci95']:.4f})")
+    elapsed = time.time() - cgra_ms_start
+    print(f"  Done in {elapsed:.1f}s")
+
     # Generate report
     print("\nGenerating thesis report...")
     report = generate_report(
         het_sweep, multi_seed, rc_sweep, oracle_gaps,
+        cgra_het_sweep=cgra_het_sweep,
+        cgra_multi_seed=cgra_multi_seed,
     )
 
     REPORT_PATH.write_text(report)

@@ -18,6 +18,7 @@ from pathlib import Path
 import numpy as np
 
 from adaptive_firmware.hardware.configs import AcceleratorConfig, CONFIG_PRESETS
+from adaptive_firmware.hardware.cgra_configs import CGRA_PRESETS, CGRA_CACHE_CAPACITY
 from adaptive_firmware.observation.telemetry import WorkloadTrace
 from adaptive_firmware.runtime.middleware import AdaptiveMiddleware
 from adaptive_firmware.agent.rl_agent import ReconfigAgent
@@ -167,6 +168,7 @@ def _build_middleware(
     configs: list[AcceleratorConfig],
     energy_weight: float = 0.15,
     seed: int = 42,
+    cache_capacity: int = 2,
 ) -> AdaptiveMiddleware:
     """Build middleware for a given agent type.
 
@@ -176,7 +178,7 @@ def _build_middleware(
         config_id = int(agent.split("_")[1])
         mw = AdaptiveMiddleware(
             configs=configs,
-            cache_capacity=2,
+            cache_capacity=cache_capacity,
             energy_weight=energy_weight,
         )
         return _wrap_static(mw, config_id)
@@ -184,7 +186,7 @@ def _build_middleware(
     if agent == "tabular":
         return AdaptiveMiddleware(
             configs=configs,
-            cache_capacity=2,
+            cache_capacity=cache_capacity,
             learning_rate=0.25,
             epsilon_start=0.3,
             energy_weight=energy_weight,
@@ -193,7 +195,7 @@ def _build_middleware(
     if agent == "neural":
         mw = AdaptiveMiddleware(
             configs=configs,
-            cache_capacity=2,
+            cache_capacity=cache_capacity,
             energy_weight=energy_weight,
         )
         mw.agent = NeuralReconfigAgent(
@@ -210,7 +212,7 @@ def _build_middleware(
     if agent == "ucb":
         mw = AdaptiveMiddleware(
             configs=configs,
-            cache_capacity=2,
+            cache_capacity=cache_capacity,
             energy_weight=energy_weight,
         )
         mw.agent = UCBAgent(
@@ -222,7 +224,7 @@ def _build_middleware(
     if agent == "ucb_cache":
         mw = AdaptiveMiddleware(
             configs=configs,
-            cache_capacity=2,
+            cache_capacity=cache_capacity,
             energy_weight=energy_weight,
         )
         mw.agent = UCBAgent(
@@ -253,6 +255,7 @@ def run_agent_on_traces(
     energy_weight: float = 0.15,
     reconfig_multiplier: float = 1.0,
     seed: int = 42,
+    use_cgra: bool = False,
 ) -> AgentResult:
     """Run a single agent on traces and return results.
 
@@ -262,12 +265,15 @@ def run_agent_on_traces(
         energy_weight: Reward function tradeoff (0=throughput, 1=energy).
         reconfig_multiplier: Scale factor for reconfiguration time.
         seed: Random seed for stochastic agents.
+        use_cgra: Use CGRA accelerator configs instead of FPGA.
 
     Returns:
         AgentResult with key metrics.
     """
-    configs = scale_reconfig_time(CONFIG_PRESETS, reconfig_multiplier)
-    mw = _build_middleware(agent, configs, energy_weight, seed)
+    base_configs = CGRA_PRESETS if use_cgra else CONFIG_PRESETS
+    cache_capacity = CGRA_CACHE_CAPACITY if use_cgra else 2
+    configs = scale_reconfig_time(base_configs, reconfig_multiplier)
+    mw = _build_middleware(agent, configs, energy_weight, seed, cache_capacity)
     report = mw.run_episode(traces)
 
     return AgentResult(
@@ -287,6 +293,7 @@ def run_all_agents_on_traces(
     reconfig_multiplier: float = 1.0,
     seed: int = 42,
     agents: list[str] | None = None,
+    use_cgra: bool = False,
 ) -> dict[str, AgentResult]:
     """Run all agents on the same traces for comparison.
 
@@ -303,7 +310,7 @@ def run_all_agents_on_traces(
     results: dict[str, AgentResult] = {}
     for agent in agents:
         results[agent] = run_agent_on_traces(
-            agent, traces, energy_weight, reconfig_multiplier, seed,
+            agent, traces, energy_weight, reconfig_multiplier, seed, use_cgra=use_cgra,
         )
 
     return results

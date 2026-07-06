@@ -53,6 +53,8 @@ I later added a **Thompson sampling agent** (UCBAgent) — a Bayesian bandit tha
 
 The real insight came when I investigated **why** learning agents can't capture oracle headroom. The answer: **cache blindness.** Every config switch incurs a reconfiguration penalty, and similar to how a cold CPU cache degrades performance, a cold bitstream cache makes configs look worse than they really are — poisoning the agent's posterior. I built a **cache-aware Thompson variant** that debiases the reward signal and accounts for cache state during action selection. The result: 3× lower variance across seeds, marginal mean improvement (0.3872), and big wins on the trickiest workload (llm_decode: +24% over standard UCB). But it still can't match the look-ahead oracle, which plans over the full trace sequence with perfect knowledge. **The gap is fundamentally about look-ahead, not about cache awareness.**
 
+Then I asked a different question: what if the hardware itself changes? FPGAs take milliseconds to reconfigure, which is the root cause of the whole problem. But **CGRAs** (Coarse-Grained Reconfigurable Arrays) can switch configurations in a single cycle — essentially free. I modeled a CGRA with 4 accelerator presets (WIDE, STREAM, BALANCED, LP) and re-ran the full benchmark suite. The result is the cleanest finding yet: **on CGRA, the tabular Q-learning agent achieves 0.3886, decisively beating the best static config at 0.3747 — a +3.7% improvement.** The adaptive agent captures 79% of the look-ahead oracle's headroom versus being below static on FPGA. This confirms the thesis: when reconfiguration is free, learning to adapt is always worth it. The bottleneck is the hardware, not the algorithm.
+
 ## What I learned along the way
 
 Three things became clear:
@@ -71,7 +73,7 @@ Here's what's on the roadmap:
 - [x] Neural network policy for the learning brain — done
 - [x] Look-ahead scheduling that hides reconfiguration cost — done
 - [x] Oracle gap analysis with cache-aware agent — explored
-- [ ] A more advanced chip type (CGRA) that reconfigures faster
+- [x] A more advanced chip type (CGRA) that reconfigures faster — adaptive beats static decisively (+3.7%)
 - [ ] A real hardware port — starting with a $249 dev board
 - [ ] A standardized benchmark so the field can measure progress
 

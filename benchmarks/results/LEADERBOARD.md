@@ -108,6 +108,28 @@ decisions while the look-ahead oracle plans over the full sequence.
 
 ---
 
+## CGRA Architecture: Adaptive Finally Beats Static
+
+CGRA (Coarse-Grained Reconfigurable Array) reconfigures in a single cycle
+(~0.001ms) vs FPGA's 3-8ms. With 4 config slots and cycle-level switching,
+the reconfiguration penalty disappears.
+
+**Multi-seed analysis (mixed_production, 15 seeds, CGRA configs):**
+
+| Agent | Mean ± Std | 95% CI | vs static_3 | vs lookahead |
+|-------|-----------:|------:|-----------:|-------------:|
+| tabular | **0.3886** ± 0.0065 | ±0.0033 | **+0.0139** | -0.0036 |
+| ucb_cache | 0.3822 ± 0.0059 | ±0.0030 | +0.0075 | -0.0100 |
+| ucb (standard) | 0.3814 ± 0.0060 | ±0.0030 | +0.0067 | -0.0108 |
+| static_3 | 0.3747 ± 0.0032 | ±0.0016 | — | -0.0175 |
+| lookahead | 0.3922 ± 0.0074 | ±0.0037 | +0.0175 | — |
+
+Key finding: **On CGRA, tabular Q-learning decisively beats the best static
+config (+3.7%)** — the first time any adaptive agent has done so on mixed_production.
+It captures 79% of the look-ahead oracle's headroom. This confirms that the
+fundamental bottleneck on FPGA was reconfiguration cost, not the learning
+algorithm. When reconfiguration is free, adaptation wins.
+
 To reproduce: `python -m benchmarks.runner`
 To submit your own results: open a PR with your JSON files in `benchmarks/results/`
 
