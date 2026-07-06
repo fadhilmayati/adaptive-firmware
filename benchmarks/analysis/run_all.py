@@ -67,8 +67,8 @@ def run_heterogeneity_sweep(
         het = compute_heterogeneity(traces)
         results = run_all_agents_on_traces(traces, seed=42)
 
-        # Best adaptive agent (among tabular, neural, profile, smart_static, ucb)
-        adaptive_agents = ["tabular", "neural", "profile", "smart_static", "ucb"]
+        # Best adaptive agent (among learning agents + ucb variants)
+        adaptive_agents = ["tabular", "neural", "profile", "smart_static", "ucb", "ucb_cache"]
         adaptive_best = max(results[a].avg_reward for a in adaptive_agents)
 
         # Best static config (among static_2, static_3)
@@ -215,7 +215,7 @@ def run_reconfig_sweep(
     for m in multipliers:
         results = run_all_agents_on_traces(traces, reconfig_multiplier=m, seed=42)
 
-        adaptive_agents = ["tabular", "neural", "profile", "smart_static", "ucb"]
+        adaptive_agents = ["tabular", "neural", "profile", "smart_static", "ucb", "ucb_cache"]
         adaptive_best = max(results[a].avg_reward for a in adaptive_agents)
         static_best = max(
             results[a].avg_reward for a in ["static_2", "static_3"]
@@ -423,7 +423,7 @@ def generate_report(
         d = sweep_data[het]
         lines.append(f"**Heterogeneity = {het:.4f}** (switch_prob = {d['switch_prob']:.2f})")
         agent_rows = []
-        for agent in ["lookahead", "oracle", "smart_static", "static_2", "static_3", "ucb", "tabular", "neural", "profile", "random"]:
+        for agent in ["lookahead", "oracle", "smart_static", "static_2", "static_3", "ucb", "ucb_cache", "tabular", "neural", "profile", "random"]:
             if agent in d:
                 agent_rows.append([agent, d[agent]])
         lines.append(format_table(
@@ -734,8 +734,8 @@ def main() -> None:
 
     multi_seed: dict[str, dict] = {}
     for wl_name, agents in [
-        ("mixed_production", ["tabular", "ucb", "smart_static", "static_3", "oracle", "lookahead"]),
-        ("llm_decode", ["tabular", "ucb", "smart_static", "static_3", "oracle", "lookahead"]),
+        ("mixed_production", ["tabular", "ucb", "ucb_cache", "smart_static", "static_3", "oracle", "lookahead"]),
+        ("llm_decode", ["tabular", "ucb", "ucb_cache", "smart_static", "static_3", "oracle", "lookahead"]),
     ]:
         print(f"  Running {wl_name} with {agents}...")
         ms_data = run_multi_seed_analysis(wl_name, agents, n_seeds=15)

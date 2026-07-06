@@ -18,17 +18,17 @@ metric in [0, 1].
 
 | Switch Prob | Heterogeneity | Best Adaptive | Agent | Best Static | Agent | Delta | Winner |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-|        0.00 |        0.0000 |        0.9880 |            ucb |      0.7684 |       static_2 | +0.2197 | adaptive |
-|        0.01 |        0.0080 |        0.7848 |        tabular |      0.6063 |       static_2 | +0.1785 | adaptive |
-|        0.02 |        0.0180 |        0.7705 |            ucb |      0.5937 |       static_2 | +0.1768 | adaptive |
-|        0.05 |        0.0470 |        0.7218 |            ucb |      0.5494 |       static_2 | +0.1724 | adaptive |
-|        0.10 |        0.1011 |        0.7474 |            ucb |      0.5795 |       static_2 | +0.1679 | adaptive |
-|        0.15 |        0.1572 |        0.7428 |        tabular |      0.5726 |       static_2 | +0.1702 | adaptive |
-|        0.20 |        0.1942 |        0.7589 |            ucb |      0.5914 |       static_2 | +0.1675 | adaptive |
-|        0.30 |        0.3033 |        0.7450 |        tabular |      0.5842 |       static_2 | +0.1608 | adaptive |
-|        0.50 |        0.5155 |        0.7253 |            ucb |      0.5682 |       static_2 | +0.1571 | adaptive |
-|        0.75 |        0.7558 |        0.7276 |            ucb |      0.5639 |       static_2 | +0.1637 | adaptive |
-|        1.00 |        1.0000 |        0.7235 |            ucb |      0.5673 |       static_2 | +0.1562 | adaptive |
+|        0.00 |        0.0000 |        0.9883 |            ucb |      0.7684 |       static_2 | +0.2199 | adaptive |
+|        0.01 |        0.0080 |        0.7876 |            ucb |      0.6063 |       static_2 | +0.1813 | adaptive |
+|        0.02 |        0.0180 |        0.7698 |            ucb |      0.5937 |       static_2 | +0.1761 | adaptive |
+|        0.05 |        0.0470 |        0.7169 |            ucb |      0.5494 |       static_2 | +0.1675 | adaptive |
+|        0.10 |        0.1011 |        0.7466 |            ucb |      0.5795 |       static_2 | +0.1671 | adaptive |
+|        0.15 |        0.1572 |        0.7342 |            ucb |      0.5726 |       static_2 | +0.1617 | adaptive |
+|        0.20 |        0.1942 |        0.7622 |            ucb |      0.5914 |       static_2 | +0.1708 | adaptive |
+|        0.30 |        0.3033 |        0.7490 |            ucb |      0.5842 |       static_2 | +0.1648 | adaptive |
+|        0.50 |        0.5155 |        0.7206 |      ucb_cache |      0.5682 |       static_2 | +0.1523 | adaptive |
+|        0.75 |        0.7558 |        0.7253 |        tabular |      0.5639 |       static_2 | +0.1613 | adaptive |
+|        1.00 |        1.0000 |        0.7256 |            ucb |      0.5673 |       static_2 | +0.1583 | adaptive |
 
 **Crossover point**: heterogeneity = 0.0000
 
@@ -47,10 +47,11 @@ advantage for adaptation. This is the best-case scenario for adaptive reconfigur
 |   smart_static |     0.9777 |
 |       static_2 |     0.7684 |
 |       static_3 |     0.5622 |
-|            ucb |     0.9880 |
-|        tabular |     0.9645 |
-|         neural |     0.8537 |
-|        profile |     0.9679 |
+|            ucb |     0.9883 |
+|      ucb_cache |     0.9844 |
+|        tabular |     0.9564 |
+|         neural |     0.8546 |
+|        profile |     0.9683 |
 |         random |     0.0000 |
 
 **Heterogeneity = 1.0000** (switch_prob = 1.00)
@@ -61,10 +62,11 @@ advantage for adaptation. This is the best-case scenario for adaptive reconfigur
 |   smart_static |     0.6241 |
 |       static_2 |     0.5673 |
 |       static_3 |     0.4990 |
-|            ucb |     0.7235 |
-|        tabular |     0.7195 |
-|         neural |     0.5699 |
-|        profile |     0.6182 |
+|            ucb |     0.7256 |
+|      ucb_cache |     0.7226 |
+|        tabular |     0.7219 |
+|         neural |     0.6041 |
+|        profile |     0.6172 |
 |         random |     0.0000 |
 
 ---
@@ -79,31 +81,33 @@ real or just noise.
 
 | Agent | Mean Reward | Std | 95% CI | Time (ms) | Energy (mJ) | Cache Hit |
 | --- | --- | --- | --- | --- | --- | --- |
-|        tabular |      0.3789 | 0.0160 |  0.0081 |    753.32 |      164.42 |     98.2% |
-|            ucb |      0.3847 | 0.0091 |  0.0046 |   1286.88 |      268.21 |     96.8% |
+|        tabular |      0.3730 | 0.0219 |  0.0111 |    721.23 |      158.15 |     98.3% |
+|            ucb |      0.3865 | 0.0076 |  0.0038 |   1309.59 |      272.31 |     96.7% |
+|      ucb_cache |      0.3872 | 0.0065 |  0.0033 |    526.32 |      115.88 |     98.8% |
 |   smart_static |      0.3419 | 0.0562 |  0.0284 |     52.04 |       19.32 |     99.9% |
 |       static_3 |      0.3866 | 0.0036 |  0.0018 |     32.82 |       10.73 |    100.0% |
 |         oracle |      0.3738 | 0.0089 |  0.0045 |    337.65 |       83.23 |     99.3% |
 |      lookahead |      0.4039 | 0.0080 |  0.0040 |    247.23 |       59.99 |     99.4% |
 
-**Tabular vs static_3**: t = -1.825, p = 0.0680 (not significant)
+**Tabular vs static_3**: t = -2.363, p = 0.0181 (significant)
 
-**Smart_static vs tabular**: t = -2.448, p = 0.0144 (significant)
+**Smart_static vs tabular**: t = -1.997, p = 0.0458 (significant)
 
 ### llm_decode
 
 | Agent | Mean Reward | Std | 95% CI | Time (ms) | Energy (mJ) | Cache Hit |
 | --- | --- | --- | --- | --- | --- | --- |
-|        tabular |      0.2936 | 0.0103 |  0.0052 |    130.74 |       26.26 |     85.4% |
-|            ucb |      0.2330 | 0.0140 |  0.0071 |    274.57 |       55.02 |     67.4% |
+|        tabular |      0.2971 | 0.0117 |  0.0059 |    118.28 |       23.77 |     86.8% |
+|            ucb |      0.2288 | 0.0249 |  0.0126 |    283.36 |       56.78 |     66.0% |
+|      ucb_cache |      0.2843 | 0.0117 |  0.0059 |    115.50 |       23.19 |     86.6% |
 |   smart_static |      0.3457 | 0.0000 |  0.0000 |     22.56 |        4.55 |     97.5% |
 |       static_3 |      0.3690 | 0.0000 |  0.0000 |      3.58 |        0.74 |     99.4% |
 |         oracle |      0.3354 | 0.0000 |  0.0000 |      6.19 |        1.39 |     99.4% |
 |      lookahead |      0.3690 | 0.0000 |  0.0000 |      3.58 |        0.74 |     99.4% |
 
-**Tabular vs static_3**: t = -28.460, p = 0.0000 (significant)
+**Tabular vs static_3**: t = -23.827, p = 0.0000 (significant)
 
-**Smart_static vs tabular**: t = 19.666, p = 0.0000 (significant)
+**Smart_static vs tabular**: t = 16.106, p = 0.0000 (significant)
 
 ---
 
@@ -115,16 +119,16 @@ and track the crossover where adaptive advantage disappears.
 
 | Mult | Best Adaptive | Best Static | Delta | Winner |
 | --- | --- | --- | --- | --- |
-|  0.05 |         0.7557 |       0.5843 |  +0.1714 | adaptive |
-|  0.10 |         0.7543 |       0.5843 |  +0.1699 | adaptive |
-|  0.20 |         0.7550 |       0.5843 |  +0.1706 | adaptive |
-|  0.50 |         0.7539 |       0.5843 |  +0.1697 | adaptive |
-|  1.00 |         0.7357 |       0.5842 |  +0.1515 | adaptive |
-|  2.00 |         0.7534 |       0.5842 |  +0.1692 | adaptive |
-|  5.00 |         0.7516 |       0.5842 |  +0.1674 | adaptive |
-| 10.00 |         0.7525 |       0.5842 |  +0.1683 | adaptive |
-| 20.00 |         0.7557 |       0.5842 |  +0.1716 | adaptive |
-| 50.00 |         0.7503 |       0.5842 |  +0.1661 | adaptive |
+|  0.05 |         0.7617 |       0.5843 |  +0.1774 | adaptive |
+|  0.10 |         0.7542 |       0.5843 |  +0.1698 | adaptive |
+|  0.20 |         0.7514 |       0.5843 |  +0.1670 | adaptive |
+|  0.50 |         0.7514 |       0.5843 |  +0.1672 | adaptive |
+|  1.00 |         0.7476 |       0.5842 |  +0.1634 | adaptive |
+|  2.00 |         0.7478 |       0.5842 |  +0.1636 | adaptive |
+|  5.00 |         0.7530 |       0.5842 |  +0.1688 | adaptive |
+| 10.00 |         0.7463 |       0.5842 |  +0.1621 | adaptive |
+| 20.00 |         0.7502 |       0.5842 |  +0.1660 | adaptive |
+| 50.00 |         0.7499 |       0.5842 |  +0.1657 | adaptive |
 
 **No crossover found** — adaptive maintains advantage across all multipliers.
 
@@ -138,45 +142,50 @@ A negative gap means the agent is worse than the best static.
 
 | Workload | Agent | Reward | Best Static | Oracle | Gap |
 | --- | --- | --- | --- | --- | --- |
-|      audio_encoder |         neural |  0.5951 |       0.7076 |  0.7076 |     N/A |
+|      audio_encoder |         neural |  0.6795 |       0.7076 |  0.7076 |     N/A |
 |      audio_encoder |        profile |  0.5897 |       0.7076 |  0.7076 |     N/A |
 |      audio_encoder |   smart_static |  0.5897 |       0.7076 |  0.7076 |     N/A |
 |      audio_encoder |       static_2 |  0.7076 |       0.7076 |  0.7076 |     N/A |
 |      audio_encoder |       static_3 |  0.5125 |       0.7076 |  0.7076 |     N/A |
-|      audio_encoder |        tabular |  0.6795 |       0.7076 |  0.7076 |     N/A |
-|      audio_encoder |            ucb |  0.4880 |       0.7076 |  0.7076 |     N/A |
-|       cv_detection |         neural |  0.5271 |       0.6458 |  0.6458 |     N/A |
+|      audio_encoder |        tabular |  0.5545 |       0.7076 |  0.7076 |     N/A |
+|      audio_encoder |            ucb |  0.5889 |       0.7076 |  0.7076 |     N/A |
+|      audio_encoder |      ucb_cache |  0.6018 |       0.7076 |  0.7076 |     N/A |
+|       cv_detection |         neural |  0.5714 |       0.6458 |  0.6458 |     N/A |
 |       cv_detection |        profile |  0.4238 |       0.6458 |  0.6458 |     N/A |
 |       cv_detection |   smart_static |  0.4238 |       0.6458 |  0.6458 |     N/A |
 |       cv_detection |       static_2 |  0.6458 |       0.6458 |  0.6458 |     N/A |
 |       cv_detection |       static_3 |  0.5125 |       0.6458 |  0.6458 |     N/A |
-|       cv_detection |        tabular |  0.5605 |       0.6458 |  0.6458 |     N/A |
-|       cv_detection |            ucb |  0.2743 |       0.6458 |  0.6458 |     N/A |
-|         llm_decode |         neural |  0.2936 |       0.3690 |  0.3690 |     N/A |
-|         llm_decode |        profile |  0.3387 |       0.3690 |  0.3690 |     N/A |
+|       cv_detection |        tabular |  0.4428 |       0.6458 |  0.6458 |     N/A |
+|       cv_detection |            ucb |  0.5552 |       0.6458 |  0.6458 |     N/A |
+|       cv_detection |      ucb_cache |  0.4714 |       0.6458 |  0.6458 |     N/A |
+|         llm_decode |         neural |  0.3053 |       0.3690 |  0.3690 |     N/A |
+|         llm_decode |        profile |  0.3434 |       0.3690 |  0.3690 |     N/A |
 |         llm_decode |   smart_static |  0.3457 |       0.3690 |  0.3690 |     N/A |
 |         llm_decode |       static_2 |  0.2671 |       0.3690 |  0.3690 |     N/A |
 |         llm_decode |       static_3 |  0.3690 |       0.3690 |  0.3690 |     N/A |
-|         llm_decode |        tabular |  0.3058 |       0.3690 |  0.3690 |     N/A |
-|         llm_decode |            ucb |  0.2568 |       0.3690 |  0.3690 |     N/A |
-|        llm_prefill |         neural |  0.5934 |       0.5626 |  0.6720 |   0.282 |
+|         llm_decode |        tabular |  0.2795 |       0.3690 |  0.3690 |     N/A |
+|         llm_decode |            ucb |  0.2431 |       0.3690 |  0.3690 |     N/A |
+|         llm_decode |      ucb_cache |  0.2821 |       0.3690 |  0.3690 |     N/A |
+|        llm_prefill |         neural |  0.6375 |       0.5626 |  0.6720 |   0.685 |
 |        llm_prefill |        profile |  0.5160 |       0.5626 |  0.6720 |  -0.426 |
 |        llm_prefill |   smart_static |  0.5160 |       0.5626 |  0.6720 |  -0.426 |
 |        llm_prefill |       static_2 |  0.5626 |       0.5626 |  0.6720 |   0.000 |
 |        llm_prefill |       static_3 |  0.4942 |       0.5626 |  0.6720 |  -0.626 |
-|        llm_prefill |        tabular |  0.5485 |       0.5626 |  0.6720 |  -0.129 |
-|        llm_prefill |            ucb |  0.5062 |       0.5626 |  0.6720 |  -0.516 |
-|   mixed_production |         neural |  0.3633 |       0.3835 |  0.3975 |  -1.447 |
-|   mixed_production |        profile |  0.3797 |       0.3835 |  0.3975 |  -0.271 |
+|        llm_prefill |        tabular |  0.5878 |       0.5626 |  0.6720 |   0.231 |
+|        llm_prefill |            ucb |  0.5041 |       0.5626 |  0.6720 |  -0.535 |
+|        llm_prefill |      ucb_cache |  0.5740 |       0.5626 |  0.6720 |   0.104 |
+|   mixed_production |         neural |  0.3639 |       0.3835 |  0.3975 |  -1.405 |
+|   mixed_production |        profile |  0.3794 |       0.3835 |  0.3975 |  -0.298 |
 |   mixed_production |   smart_static |  0.3831 |       0.3835 |  0.3975 |  -0.030 |
 |   mixed_production |       static_2 |  0.2986 |       0.3835 |  0.3975 |  -6.074 |
 |   mixed_production |       static_3 |  0.3835 |       0.3835 |  0.3975 |   0.000 |
-|   mixed_production |        tabular |  0.3916 |       0.3835 |  0.3975 |   0.576 |
-|   mixed_production |            ucb |  0.3763 |       0.3835 |  0.3975 |  -0.518 |
+|   mixed_production |        tabular |  0.3922 |       0.3835 |  0.3975 |   0.621 |
+|   mixed_production |            ucb |  0.3841 |       0.3835 |  0.3975 |   0.040 |
+|   mixed_production |      ucb_cache |  0.3820 |       0.3835 |  0.3975 |  -0.107 |
 
-**14 of 35 entries have valid headroom** (oracle > best_static). 21 entries have zero headroom (oracle == best_static — the workload is homogeneous enough that no adaptive policy can beat a fixed config).
+**16 of 40 entries have valid headroom** (oracle > best_static). 24 entries have zero headroom (oracle == best_static — the workload is homogeneous enough that no adaptive policy can beat a fixed config).
 
-**Mean oracle gap** (workloads with headroom): -0.686
+**Mean oracle gap** (workloads with headroom): -0.515
 
 **Interpretation**: On workloads with genuine headroom, adaptive agents often score below the oracle. Negative gaps mean the agent is worse than the best static config despite headroom existing — the agent's exploration cost and learning latency outweigh the potential benefit. On homogeneous workloads (oracle == best static), there is no headroom to capture.
 
@@ -187,9 +196,9 @@ A negative gap means the agent is worse than the best static.
 Based on the four analyses above, we can now state the thesis with quantified bounds:
 
 - **On synthetic workloads with well-separated config classes**, adaptive agents beat static at ALL heterogeneity levels. Each workload class maps to a clearly different optimal accelerator config, so even minimal switching creates an advantage. This is a best-case scenario for adaptation.
-- **On mixed_production**, the tabular adaptive agent (0.3789 ± 0.0160) loses to the static_3 config (0.3866 ± 0.0036). This difference is not statistically significant (p = 0.0680, t = -1.825).
-- **On llm_decode**, the tabular adaptive agent (0.2936 ± 0.0103) loses to the static_3 config (0.3690 ± 0.0000). This difference is statistically significant (p = 0.0000, t = -28.460).
-- **Adaptive agents score below the best static on average** (mean oracle gap = -0.686). Even though the look-ahead oracle shows genuine headroom exists on some workloads, learning agents' exploration overhead and slow convergence outweigh the potential benefit. This suggests the learning algorithms (tabular Q-learning, neural bandit) need improvement more than the hardware design does.
+- **On mixed_production**, the tabular adaptive agent (0.3730 ± 0.0219) loses to the static_3 config (0.3866 ± 0.0036). This difference is statistically significant (p = 0.0181, t = -2.363).
+- **On llm_decode**, the tabular adaptive agent (0.2971 ± 0.0117) loses to the static_3 config (0.3690 ± 0.0000). This difference is statistically significant (p = 0.0000, t = -23.827).
+- **Adaptive agents score below the best static on average** (mean oracle gap = -0.515). Even though the look-ahead oracle shows genuine headroom exists on some workloads, learning agents' exploration overhead and slow convergence outweigh the potential benefit. This suggests the learning algorithms (tabular Q-learning, neural bandit) need improvement more than the hardware design does.
 - **On homogeneous workloads (llm_decode type)**, no adaptive agent beats the best static configuration, regardless of reconfiguration cost or energy weight. Adaptation is strictly unnecessary when the workload doesn't change.
 
 ### Key open questions

@@ -13,6 +13,12 @@ Key difference visible in benchmarks:
     faster because it explores uncertain arms more often.
   - Small homogeneous workloads: Thompson explores too much because the
     posterior stays wide for seldom-seen states.
+
+Cache-aware mode (cache_aware=True):
+  Debiases the reward signal to remove the cache bonus/reconfiguration penalty
+  from posterior updates, then re-adds the cache effect at action-selection
+  time. This prevents the agent from conflating "this config is good for the
+  workload" with "this config was lucky enough to have a warm cache."
 """
 
 from __future__ import annotations
@@ -32,11 +38,19 @@ class UCBAgent:
     for each accelerator config (action). Action selection samples from the
     posterior and picks the max — naturally balancing exploration of
     uncertain arms with exploitation of configs known to be good.
+
+    When cache_aware=True, the agent debiases the reward signal to remove
+    the cache bonus/reconfiguration penalty from posterior updates, then
+    re-adds these effects at action-selection time. This lets the agent
+    learn each config's true steady-state quality without conflating it
+    with transient cache state.
     """
 
     STATES = ["compute_bound", "memory_bound", "balanced", "unknown"]
     DEFAULT_ENERGY_WEIGHT = 0.15
     PRIOR_STRENGTH = 4
+    CACHE_BONUS = 0.2
+    _AMORTIZATION_HORIZON = 3  # Empirically optimal: balances switch-cost avoidance with exploration
 
     def __init__(
         self,
@@ -44,6 +58,7 @@ class UCBAgent:
         energy_weight: float | None = None,
         drift_window: int = 30,
         drift_threshold: float = 2.0,
+        cache_aware: bool = False,
     ) -> None:
         self.configs = configs
         self.n_actions = len(configs)
@@ -51,6 +66,8 @@ class UCBAgent:
         self.energy_weight = (
             energy_weight if energy_weight is not None else self.DEFAULT_ENERGY_WEIGHT
         )
+        self.cache_aware = cache_aware
+        self._last_cache_effect: float = 0.0
 
         self.alpha: dict[str, np.ndarray] = {}
         self.beta: dict[str, np.ndarray] = {}
@@ -98,11 +115,28 @@ class UCBAgent:
 
         Samples from each config's Beta posterior and picks the config
         with the highest sampled value.
+
+        In cache_aware mode, adjusts cold config samples down by an
+        amortized switching cost (one-time penalty + lost cache bonus
+        divided over a reasonable horizon). This prevents the agent from
+        conflating "this config is better" with "I'm already cached on
+        this config," while still accounting for the real (but amortized)
+        cost of switching.
         """
         state = self._discretize_state(telemetry)
         self._last_state = state
 
         samples = np.random.beta(self.alpha[state], self.beta[state])
+
+        if self.cache_aware:
+            cached = telemetry.cache_loaded_configs
+            for j in range(self.n_actions):
+                if j not in cached:
+                    cfg = self.config_by_id[j]
+                    penalty = min(0.25, cfg.reconfig_time_ms / 30.0)
+                    # Amortize the one-time switch cost over H future traces
+                    amortized = (self.CACHE_BONUS + penalty) / self._AMORTIZATION_HORIZON
+                    samples[j] -= amortized
 
         max_val = samples.max()
         best_actions = np.where(samples == max_val)[0]
@@ -117,11 +151,24 @@ class UCBAgent:
         action: int,
         reward: float,
     ) -> None:
-        """Update Beta posterior based on observed reward."""
+        """Update Beta posterior based on observed reward.
+
+        In cache_aware mode, debiases the reward by removing the cache
+        effect (cache bonus + reconfiguration penalty) before updating
+        the posterior. This ensures the posterior reflects the config's
+        true steady-state quality, not a transient cache windfall or
+        cold-start penalty.
+        """
         state = self._discretize_state(telemetry)
 
-        self.alpha[state][action] += reward
-        self.beta[state][action] += 1.0 - reward
+        if self.cache_aware:
+            debiased = reward - self._last_cache_effect
+            debiased = max(0.0, min(1.0, debiased))
+        else:
+            debiased = reward
+
+        self.alpha[state][action] += debiased
+        self.beta[state][action] += 1.0 - debiased
 
         drift = self.drift_detector.update(reward)
         if drift:
@@ -163,7 +210,7 @@ class UCBAgent:
         else:
             energy_score = 0.5
 
-        cache_bonus = 0.2 if exec_result.cache_hit else 0.0
+        cache_bonus = self.CACHE_BONUS if exec_result.cache_hit else 0.0
         reconfig_penalty = min(0.25, exec_result.reconfig_time_ms / 30.0)
         budget_penalty = 0.0 if energy_budget_remaining > 0.2 else 0.2
 
@@ -174,6 +221,9 @@ class UCBAgent:
             - reconfig_penalty
             - budget_penalty
         )
+
+        if self.cache_aware:
+            self._last_cache_effect = cache_bonus - reconfig_penalty
 
         return max(0.0, min(1.0, reward))
 

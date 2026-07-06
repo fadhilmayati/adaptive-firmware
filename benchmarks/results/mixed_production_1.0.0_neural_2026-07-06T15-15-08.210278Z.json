@@ -1,0 +1,29 @@
+{
+  "agent_config": {
+    "energy_weight": 0.15
+  },
+  "agent_name": "neural",
+  "avg_reward": 0.36388039229185554,
+  "cache_hit_rate": 0.9868324798829554,
+  "config_usage": {
+    "0": 267,
+    "1": 7666,
+    "2": 244,
+    "3": 25
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 8202,
+  "run_time_seconds": 0.30895018577575684,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-06T15:15:08.210278Z",
+  "total_energy_mj": 143.14564096,
+  "total_reconfig_time_ms": 627.0,
+  "total_time_ms": 638.354573264,
+  "workload_name": "mixed_production",
+  "workload_version": "1.0.0"
+}

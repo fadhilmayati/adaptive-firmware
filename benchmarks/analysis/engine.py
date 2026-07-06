@@ -219,6 +219,19 @@ def _build_middleware(
         )
         return mw
 
+    if agent == "ucb_cache":
+        mw = AdaptiveMiddleware(
+            configs=configs,
+            cache_capacity=2,
+            energy_weight=energy_weight,
+        )
+        mw.agent = UCBAgent(
+            configs=configs,
+            energy_weight=energy_weight,
+            cache_aware=True,
+        )
+        return mw
+
     if agent == "profile":
         return _wrap_profile(configs, energy_weight, commit_epsilon=0.02)
 
@@ -283,7 +296,7 @@ def run_all_agents_on_traces(
         agents = [
             "lookahead", "oracle", "smart_static",
             "static_2", "static_3",
-            "tabular", "neural", "profile", "ucb",
+            "tabular", "neural", "profile", "ucb", "ucb_cache",
             "random",
         ]
 

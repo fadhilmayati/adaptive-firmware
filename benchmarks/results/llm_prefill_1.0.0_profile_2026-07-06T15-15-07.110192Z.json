@@ -1,0 +1,29 @@
+{
+  "agent_config": {
+    "energy_weight": 0.15
+  },
+  "agent_name": "profile",
+  "avg_reward": 0.5159695374816271,
+  "cache_hit_rate": 0.875,
+  "config_usage": {
+    "0": 10,
+    "1": 10,
+    "2": 10,
+    "3": 2
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 32,
+  "run_time_seconds": 0.00029015541076660156,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-06T15:15:07.110192Z",
+  "total_energy_mj": 4.5245184,
+  "total_reconfig_time_ms": 22.0,
+  "total_time_ms": 22.0925568,
+  "workload_name": "llm_prefill",
+  "workload_version": "1.0.0"
+}

@@ -1,0 +1,26 @@
+{
+  "agent_config": {
+    "energy_weight": 0.15
+  },
+  "agent_name": "profile",
+  "avg_reward": 0.5897217519196895,
+  "cache_hit_rate": 0.8333333333333334,
+  "config_usage": {
+    "0": 6
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 6,
+  "run_time_seconds": 0.00012612342834472656,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-06T15:15:07.048237Z",
+  "total_energy_mj": 1.847432704,
+  "total_reconfig_time_ms": 8.0,
+  "total_time_ms": 8.045469866666668,
+  "workload_name": "audio_encoder",
+  "workload_version": "1.0.0"
+}

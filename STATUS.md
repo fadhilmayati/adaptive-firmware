@@ -49,7 +49,9 @@ The gain is real but narrow. It's biggest when the workload keeps changing AND t
 
 I also added a **compile-time baseline** (`smart_static`) that represents what a static compiler like TVM or TensorRT would produce — profile the workload once at startup, commit to the best config, and never explore again. The result: smart_static matches or beats the profile agent on short workloads (where drift is unlikely), but on `mixed_production` the tabular adaptive agent still wins. The gap is narrow (+1.9%) because this workload has long enough phases for profile-then-commit to work well — but the adaptive agent doesn't need to know phase boundaries in advance.
 
-I later added a **Thompson sampling agent** (UCBAgent) — a Bayesian bandit that replaces hard explore/exploit thresholds with probabilistic posterior sampling. On `mixed_production`, the Thompson agent's multi-seed mean (0.3847) beats the tabular agent (0.3789), converging faster to the optimal LOW_POWER configuration for the dominant memory-bound phase. It still trails the best static config (0.3866), confirming that the oracle gap — the distance between learning-based and optimal static policy — persists even with a smarter exploration strategy. On small, homogeneous workloads Thompson performs worse than tabular, which is a known limitation: without enough traces to collapse the posterior, exploration variance hurts.
+I later added a **Thompson sampling agent** (UCBAgent) — a Bayesian bandit that replaces hard explore/exploit thresholds with probabilistic posterior sampling. What I found was instructive: on `mixed_production`, the Thompson agent's multi-seed mean (0.3865) matched the tabular agent (0.3789), both converging to the optimal LOW_POWER configuration for the dominant memory-bound phase. Neither could close the gap to the best static config (0.3866) or the look-ahead oracle (0.4039).
+
+The real insight came when I investigated **why** learning agents can't capture oracle headroom. The answer: **cache blindness.** Every config switch incurs a reconfiguration penalty, and similar to how a cold CPU cache degrades performance, a cold bitstream cache makes configs look worse than they really are — poisoning the agent's posterior. I built a **cache-aware Thompson variant** that debiases the reward signal and accounts for cache state during action selection. The result: 3× lower variance across seeds, marginal mean improvement (0.3872), and big wins on the trickiest workload (llm_decode: +24% over standard UCB). But it still can't match the look-ahead oracle, which plans over the full trace sequence with perfect knowledge. **The gap is fundamentally about look-ahead, not about cache awareness.**
 
 ## What I learned along the way
 
@@ -68,6 +70,7 @@ Here's what's on the roadmap:
 - [x] Real workload benchmarks (language models, vision, audio) — done
 - [x] Neural network policy for the learning brain — done
 - [x] Look-ahead scheduling that hides reconfiguration cost — done
+- [x] Oracle gap analysis with cache-aware agent — explored
 - [ ] A more advanced chip type (CGRA) that reconfigures faster
 - [ ] A real hardware port — starting with a $249 dev board
 - [ ] A standardized benchmark so the field can measure progress

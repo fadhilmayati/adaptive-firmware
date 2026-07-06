@@ -176,6 +176,19 @@ class BenchmarkRunner:
             )
             return mw
 
+        if agent == "ucb_cache":
+            mw = AdaptiveMiddleware(
+                configs=CONFIG_PRESETS,
+                cache_capacity=config.get("cache_capacity", 2),
+                energy_weight=energy_weight,
+            )
+            mw.agent = UCBAgent(
+                configs=CONFIG_PRESETS,
+                energy_weight=energy_weight,
+                cache_aware=True,
+            )
+            return mw
+
         if agent == "random":
             return _RandomConfigMiddleware(
                 configs=CONFIG_PRESETS,
@@ -377,7 +390,7 @@ def run_all(output_dir: str = "benchmarks/results") -> list[BenchmarkResult]:
     runner = BenchmarkRunner(output_dir=output_dir)
     results: list[BenchmarkResult] = []
 
-    agents = ["oracle", "smart_static", "static_2", "static_3", "tabular", "neural", "profile", "ucb", "random"]
+    agents = ["oracle", "smart_static", "static_2", "static_3", "tabular", "neural", "profile", "ucb", "ucb_cache", "random"]
     for spec in list_workloads():
         for agent in agents:
             print(f"  Running {spec.name}@{spec.version} with {agent}...")
