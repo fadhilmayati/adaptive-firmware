@@ -1,0 +1,29 @@
+{
+  "agent_config": {
+    "energy_weight": 0.15
+  },
+  "agent_name": "neural",
+  "avg_reward": 0.5643597175731963,
+  "cache_hit_rate": 0.75,
+  "config_usage": {
+    "0": 13,
+    "1": 16,
+    "2": 2,
+    "3": 1
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 32,
+  "run_time_seconds": 0.0006289482116699219,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-06T14:39:23.791766Z",
+  "total_energy_mj": 9.922421248000001,
+  "total_reconfig_time_ms": 49.0,
+  "total_time_ms": 49.050681514666664,
+  "workload_name": "llm_prefill",
+  "workload_version": "1.0.0"
+}

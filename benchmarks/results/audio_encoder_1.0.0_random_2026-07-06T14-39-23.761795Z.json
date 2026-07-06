@@ -1,0 +1,28 @@
+{
+  "agent_config": {
+    "energy_weight": 0.15
+  },
+  "agent_name": "random",
+  "avg_reward": 0.0,
+  "cache_hit_rate": 0.16666666666666666,
+  "config_usage": {
+    "0": 1,
+    "2": 3,
+    "3": 2
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 6,
+  "run_time_seconds": 0.000225067138671875,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-06T14:39:23.761795Z",
+  "total_energy_mj": 4.960495104,
+  "total_reconfig_time_ms": 24.0,
+  "total_time_ms": 24.066254933333333,
+  "workload_name": "audio_encoder",
+  "workload_version": "1.0.0"
+}

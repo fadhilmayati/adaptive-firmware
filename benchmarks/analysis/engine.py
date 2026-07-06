@@ -23,6 +23,8 @@ from adaptive_firmware.runtime.middleware import AdaptiveMiddleware
 from adaptive_firmware.agent.rl_agent import ReconfigAgent
 from adaptive_firmware.agent.neural_agent import NeuralReconfigAgent
 from adaptive_firmware.agent.profile_agent import ProfileThenCommitAgent
+from adaptive_firmware.agent.ucb_agent import UCBAgent
+from benchmarks.analysis.lookahead_oracle import LookAheadOracleMiddleware
 
 
 # ─── Synthetic workload generator ───────────────────────────────────────
@@ -205,6 +207,18 @@ def _build_middleware(
     if agent == "random":
         return _wrap_random(configs, seed, energy_weight)
 
+    if agent == "ucb":
+        mw = AdaptiveMiddleware(
+            configs=configs,
+            cache_capacity=2,
+            energy_weight=energy_weight,
+        )
+        mw.agent = UCBAgent(
+            configs=configs,
+            energy_weight=energy_weight,
+        )
+        return mw
+
     if agent == "profile":
         return _wrap_profile(configs, energy_weight, commit_epsilon=0.02)
 
@@ -213,6 +227,9 @@ def _build_middleware(
 
     if agent == "oracle":
         return _wrap_oracle(configs, energy_weight)
+
+    if agent == "lookahead":
+        return _wrap_lookahead(configs, energy_weight)
 
     raise ValueError(f"Unknown agent: {agent!r}")
 
@@ -264,9 +281,9 @@ def run_all_agents_on_traces(
     """
     if agents is None:
         agents = [
-            "oracle", "smart_static",
+            "lookahead", "oracle", "smart_static",
             "static_2", "static_3",
-            "tabular", "neural", "profile",
+            "tabular", "neural", "profile", "ucb",
             "random",
         ]
 
@@ -502,4 +519,23 @@ def _wrap_oracle(
         for a in range(len(configs)):
             mw.agent.q_table[state][a] = 1.0 if a == best_action else 0.0
     mw.__class__ = _OracleWrapper
+    return mw
+
+
+def _wrap_lookahead(
+    configs: list[AcceleratorConfig],
+    energy_weight: float = 0.15,
+) -> AdaptiveMiddleware:
+    """Create a look-ahead oracle middleware.
+
+    The look-ahead oracle uses dynamic programming over the full trace
+    sequence with a cache-aware state model (2-slot LRU). This is the
+    true upper bound — it accounts for reconfiguration cost while
+    exploiting the cache to eliminate switch overhead between cached configs.
+    """
+    from benchmarks.analysis.lookahead_oracle import LookAheadOracleMiddleware as _LAM
+    mw = _LAM.__new__(_LAM)
+    AdaptiveMiddleware.__init__(mw, configs=configs, energy_weight=energy_weight)
+    mw.energy_weight = energy_weight
+    mw.__class__ = _LAM
     return mw

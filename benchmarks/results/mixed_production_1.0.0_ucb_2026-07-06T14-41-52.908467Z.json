@@ -1,0 +1,29 @@
+{
+  "agent_config": {
+    "energy_weight": 0.15
+  },
+  "agent_name": "ucb",
+  "avg_reward": 0.3652309127943652,
+  "cache_hit_rate": 0.9901243599122165,
+  "config_usage": {
+    "0": 247,
+    "1": 7694,
+    "2": 240,
+    "3": 21
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 8202,
+  "run_time_seconds": 0.24700188636779785,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-06T14:41:52.908467Z",
+  "total_energy_mj": 109.933739008,
+  "total_reconfig_time_ms": 461.0,
+  "total_time_ms": 472.23872265066666,
+  "workload_name": "mixed_production",
+  "workload_version": "1.0.0"
+}

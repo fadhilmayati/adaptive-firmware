@@ -1,0 +1,29 @@
+{
+  "agent_config": {
+    "energy_weight": 0.15
+  },
+  "agent_name": "smart_static",
+  "avg_reward": 0.3830988755640112,
+  "cache_hit_rate": 0.9995123140697391,
+  "config_usage": {
+    "0": 10,
+    "1": 10,
+    "2": 10,
+    "3": 8172
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 8202,
+  "run_time_seconds": 0.11424612998962402,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-06T14:39:24.020593Z",
+  "total_energy_mj": 15.023438336,
+  "total_reconfig_time_ms": 22.0,
+  "total_time_ms": 54.46658336,
+  "workload_name": "mixed_production",
+  "workload_version": "1.0.0"
+}

@@ -24,6 +24,7 @@ from adaptive_firmware.runtime.middleware import AdaptiveMiddleware
 from adaptive_firmware.agent.rl_agent import ReconfigAgent
 from adaptive_firmware.agent.neural_agent import NeuralReconfigAgent
 from adaptive_firmware.agent.profile_agent import ProfileThenCommitAgent
+from adaptive_firmware.agent.ucb_agent import UCBAgent
 
 
 @dataclass
@@ -162,6 +163,18 @@ class BenchmarkRunner:
                 epsilon_start=config.get("epsilon_start", 0.3),
                 energy_weight=energy_weight,
             )
+
+        if agent == "ucb":
+            mw = AdaptiveMiddleware(
+                configs=CONFIG_PRESETS,
+                cache_capacity=config.get("cache_capacity", 2),
+                energy_weight=energy_weight,
+            )
+            mw.agent = UCBAgent(
+                configs=CONFIG_PRESETS,
+                energy_weight=energy_weight,
+            )
+            return mw
 
         if agent == "random":
             return _RandomConfigMiddleware(
@@ -364,7 +377,7 @@ def run_all(output_dir: str = "benchmarks/results") -> list[BenchmarkResult]:
     runner = BenchmarkRunner(output_dir=output_dir)
     results: list[BenchmarkResult] = []
 
-    agents = ["oracle", "smart_static", "static_2", "static_3", "tabular", "neural", "profile", "random"]
+    agents = ["oracle", "smart_static", "static_2", "static_3", "tabular", "neural", "profile", "ucb", "random"]
     for spec in list_workloads():
         for agent in agents:
             print(f"  Running {spec.name}@{spec.version} with {agent}...")

@@ -49,6 +49,8 @@ The gain is real but narrow. It's biggest when the workload keeps changing AND t
 
 I also added a **compile-time baseline** (`smart_static`) that represents what a static compiler like TVM or TensorRT would produce — profile the workload once at startup, commit to the best config, and never explore again. The result: smart_static matches or beats the profile agent on short workloads (where drift is unlikely), but on `mixed_production` the tabular adaptive agent still wins. The gap is narrow (+1.9%) because this workload has long enough phases for profile-then-commit to work well — but the adaptive agent doesn't need to know phase boundaries in advance.
 
+I later added a **Thompson sampling agent** (UCBAgent) — a Bayesian bandit that replaces hard explore/exploit thresholds with probabilistic posterior sampling. On `mixed_production`, the Thompson agent's multi-seed mean (0.3847) beats the tabular agent (0.3789), converging faster to the optimal LOW_POWER configuration for the dominant memory-bound phase. It still trails the best static config (0.3866), confirming that the oracle gap — the distance between learning-based and optimal static policy — persists even with a smarter exploration strategy. On small, homogeneous workloads Thompson performs worse than tabular, which is a known limitation: without enough traces to collapse the posterior, exploration variance hurts.
+
 ## What I learned along the way
 
 Three things became clear:

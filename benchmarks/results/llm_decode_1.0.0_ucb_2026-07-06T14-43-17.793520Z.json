@@ -1,0 +1,29 @@
+{
+  "agent_config": {
+    "energy_weight": 0.15
+  },
+  "agent_name": "ucb",
+  "avg_reward": 0.3113782719995367,
+  "cache_hit_rate": 0.925,
+  "config_usage": {
+    "0": 2,
+    "1": 145,
+    "2": 10,
+    "3": 3
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 160,
+  "run_time_seconds": 0.010132789611816406,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-06T14:43:17.793520Z",
+  "total_energy_mj": 12.587398656,
+  "total_reconfig_time_ms": 62.0,
+  "total_time_ms": 62.22528413333333,
+  "workload_name": "llm_decode",
+  "workload_version": "1.0.0"
+}

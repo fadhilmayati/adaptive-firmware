@@ -1,0 +1,29 @@
+{
+  "agent_config": {
+    "energy_weight": 0.15
+  },
+  "agent_name": "ucb",
+  "avg_reward": 0.46078339575530586,
+  "cache_hit_rate": 0.3333333333333333,
+  "config_usage": {
+    "0": 3,
+    "1": 1,
+    "2": 1,
+    "3": 1
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 6,
+  "run_time_seconds": 0.0004928112030029297,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-06T14:39:23.761394Z",
+  "total_energy_mj": 4.621525504,
+  "total_reconfig_time_ms": 22.0,
+  "total_time_ms": 22.047121066666666,
+  "workload_name": "audio_encoder",
+  "workload_version": "1.0.0"
+}

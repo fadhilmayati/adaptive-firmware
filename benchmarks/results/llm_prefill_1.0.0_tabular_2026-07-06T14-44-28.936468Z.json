@@ -1,0 +1,29 @@
+{
+  "agent_config": {
+    "energy_weight": 0.15
+  },
+  "agent_name": "tabular",
+  "avg_reward": 0.5485304904888425,
+  "cache_hit_rate": 0.71875,
+  "config_usage": {
+    "0": 12,
+    "1": 16,
+    "2": 3,
+    "3": 1
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 32,
+  "run_time_seconds": 0.0007069110870361328,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-06T14:44:28.936468Z",
+  "total_energy_mj": 10.716457472,
+  "total_reconfig_time_ms": 53.0,
+  "total_time_ms": 53.053000192,
+  "workload_name": "llm_prefill",
+  "workload_version": "1.0.0"
+}

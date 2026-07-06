@@ -1,0 +1,28 @@
+{
+  "agent_config": {
+    "energy_weight": 0.15
+  },
+  "agent_name": "oracle",
+  "avg_reward": 0.3668465381003054,
+  "cache_hit_rate": 0.9947573762496952,
+  "config_usage": {
+    "0": 240,
+    "1": 7744,
+    "2": 218
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 8202,
+  "run_time_seconds": 0.10916399955749512,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-06T14:39:23.904298Z",
+  "total_energy_mj": 72.988830208,
+  "total_reconfig_time_ms": 276.0,
+  "total_time_ms": 287.11794496,
+  "workload_name": "mixed_production",
+  "workload_version": "1.0.0"
+}

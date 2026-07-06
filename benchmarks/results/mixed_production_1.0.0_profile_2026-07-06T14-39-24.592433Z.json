@@ -1,0 +1,29 @@
+{
+  "agent_config": {
+    "energy_weight": 0.15
+  },
+  "agent_name": "profile",
+  "avg_reward": 0.3792215207603006,
+  "cache_hit_rate": 0.9898805169470861,
+  "config_usage": {
+    "0": 44,
+    "1": 48,
+    "2": 49,
+    "3": 8061
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 8202,
+  "run_time_seconds": 0.09330987930297852,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-06T14:39:24.592433Z",
+  "total_energy_mj": 113.88994816,
+  "total_reconfig_time_ms": 516.0,
+  "total_time_ms": 548.3371203573333,
+  "workload_name": "mixed_production",
+  "workload_version": "1.0.0"
+}

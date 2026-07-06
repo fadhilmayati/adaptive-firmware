@@ -1,0 +1,28 @@
+{
+  "agent_config": {
+    "energy_weight": 0.15
+  },
+  "agent_name": "ucb",
+  "avg_reward": 0.6594620778814815,
+  "cache_hit_rate": 0.90625,
+  "config_usage": {
+    "0": 16,
+    "1": 15,
+    "2": 1
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 32,
+  "run_time_seconds": 0.0014531612396240234,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-06T14:41:05.701423Z",
+  "total_energy_mj": 3.921438208,
+  "total_reconfig_time_ms": 19.0,
+  "total_time_ms": 19.046198613333335,
+  "workload_name": "llm_prefill",
+  "workload_version": "1.0.0"
+}

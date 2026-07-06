@@ -26,7 +26,9 @@ from .engine import (
     compute_heterogeneity,
     compute_oracle_gap,
     load_existing_results,
+    _wrap_lookahead,
 )
+from adaptive_firmware.hardware.configs import CONFIG_PRESETS
 from benchmarks.workloads.registry import get_workload
 
 
@@ -65,8 +67,8 @@ def run_heterogeneity_sweep(
         het = compute_heterogeneity(traces)
         results = run_all_agents_on_traces(traces, seed=42)
 
-        # Best adaptive agent (among tabular, neural, profile, smart_static)
-        adaptive_agents = ["tabular", "neural", "profile", "smart_static"]
+        # Best adaptive agent (among tabular, neural, profile, smart_static, ucb)
+        adaptive_agents = ["tabular", "neural", "profile", "smart_static", "ucb"]
         adaptive_best = max(results[a].avg_reward for a in adaptive_agents)
 
         # Best static config (among static_2, static_3)
@@ -213,7 +215,7 @@ def run_reconfig_sweep(
     for m in multipliers:
         results = run_all_agents_on_traces(traces, reconfig_multiplier=m, seed=42)
 
-        adaptive_agents = ["tabular", "neural", "profile", "smart_static"]
+        adaptive_agents = ["tabular", "neural", "profile", "smart_static", "ucb"]
         adaptive_best = max(results[a].avg_reward for a in adaptive_agents)
         static_best = max(
             results[a].avg_reward for a in ["static_2", "static_3"]
@@ -243,21 +245,52 @@ def run_reconfig_sweep(
 def compute_all_oracle_gaps(
     existing_results: list[dict] | None = None,
 ) -> list[dict]:
-    """Compute oracle gap for every existing benchmark result."""
+    """Compute oracle gap using the look-ahead oracle as the true upper bound.
+
+    Previously this used the greedy oracle (which switches on every class change),
+    but the greedy oracle ignores reconfiguration cost and can underperform static.
+    The look-ahead oracle uses cache-aware DP and is always >= any policy.
+
+    Args:
+        existing_results: Existing benchmark results (agent rewards). If None,
+                          loads from the default results directory.
+
+    Returns:
+        List of dicts with workload, agent, reward, best_static, oracle, gap.
+    """
     results = existing_results or load_existing_results()
+
+    # Deduplicate: keep the latest entry for each (workload, agent) pair
+    best_by_key: dict[tuple[str, str], dict] = {}
+    for r in results:
+        key = (r["workload_name"], r["agent_name"])
+        if key not in best_by_key:
+            best_by_key[key] = r
+        elif r.get("timestamp", "") > best_by_key[key].get("timestamp", ""):
+            best_by_key[key] = r
 
     # Group by workload
     by_workload: dict[str, list[dict]] = {}
-    for r in results:
-        by_workload.setdefault(r["workload_name"], []).append(r)
+    for (wl_name, _), entry in best_by_key.items():
+        by_workload.setdefault(wl_name, []).append(entry)
 
     gaps: list[dict] = []
     for workload, entries in by_workload.items():
-        oracle_reward = None
-        for e in entries:
-            if e["agent_name"] == "oracle":
-                oracle_reward = e["avg_reward"]
-                break
+        # Run the look-ahead oracle on this workload for the true upper bound
+        try:
+            spec = get_workload(workload)
+            traces = spec.generate()
+            mw = _wrap_lookahead(CONFIG_PRESETS)
+            report = mw.run_episode(traces)
+            oracle_reward = report.avg_reward
+        except Exception as exc:
+            oracle_reward = None
+            for e in entries:
+                if e["agent_name"] == "oracle":
+                    oracle_reward = e["avg_reward"]
+                    break
+            print(f"  Warning: look-ahead oracle failed for {workload}: {exc}, falling back to greedy")
+
         if oracle_reward is None:
             continue
 
@@ -358,12 +391,20 @@ def generate_report(
         "",
     ])
 
-    if crossover is not None:
+    if crossover is not None and crossover > 0.0:
         lines.extend([
             "**Interpretation**: At heterogeneity below this threshold, the best static configuration",
-            f"wins — the workload is homogeneous enough that a fixed config matches the optimal.",
-            f"Above this threshold, adaptive agents pull ahead because they can track the changing",
+            "wins — the workload is homogeneous enough that a fixed config matches the optimal.",
+            "Above this threshold, adaptive agents pull ahead because they can track the changing",
             "workload without paying the full exploration cost each time.",
+            "",
+        ])
+    elif crossover is not None and crossover == 0.0:
+        lines.extend([
+            "**Interpretation**: Adaptive agents beat the best static configuration at ALL",
+            "heterogeneity levels on this synthetic workload. The workload classes have such",
+            "clearly separated optimal configs that even minimal heterogeneity creates an",
+            "advantage for adaptation. This is the best-case scenario for adaptive reconfiguration.",
             "",
         ])
 
@@ -382,7 +423,7 @@ def generate_report(
         d = sweep_data[het]
         lines.append(f"**Heterogeneity = {het:.4f}** (switch_prob = {d['switch_prob']:.2f})")
         agent_rows = []
-        for agent in ["oracle", "smart_static", "static_2", "static_3", "tabular", "neural", "profile", "random"]:
+        for agent in ["lookahead", "oracle", "smart_static", "static_2", "static_3", "ucb", "tabular", "neural", "profile", "random"]:
             if agent in d:
                 agent_rows.append([agent, d[agent]])
         lines.append(format_table(
@@ -536,17 +577,29 @@ def generate_report(
 
         # Summary statistics
         valid_gaps = [g for g in oracle_gaps if g["gap"] is not None]
+        n_na = len(oracle_gaps) - len(valid_gaps)
         if valid_gaps:
             mean_gap = float(np.mean([g["gap"] for g in valid_gaps]))
+            n_positive_headroom = len([g for g in oracle_gaps if g["gap"] is not None])
+            n_zero_headroom = len([g for g in oracle_gaps if g["gap"] is None and abs(g["oracle"] - g["best_static"]) < 1e-9])
             lines.extend([
-                f"**Mean oracle gap across all workloads**: {mean_gap:.3f}",
+                f"**{n_positive_headroom} of {len(oracle_gaps)} entries have valid headroom** "
+                f"(oracle > best_static). {n_zero_headroom} entries have zero headroom "
+                f"(oracle == best_static — the workload is homogeneous enough that no adaptive "
+                f"policy can beat a fixed config).",
                 "",
-                "**Interpretation**: On average, adaptive agents capture about "
-                f"{mean_gap*100:.0f}% of the available headroom above static. The remaining "
-                f"{(1-mean_gap)*100:.0f}% is lost to exploration cost, learning latency, and",
-                "the inherent difficulty of the online learning problem.",
+                f"**Mean oracle gap** (workloads with headroom): {mean_gap:.3f}",
+                "",
+                "**Interpretation**: On workloads with genuine headroom, adaptive agents "
+                "often score below the oracle. Negative gaps mean the agent is worse than "
+                "the best static config despite headroom existing — the agent's exploration "
+                "cost and learning latency outweigh the potential benefit. On homogeneous "
+                "workloads (oracle == best static), there is no headroom to capture.",
                 "",
             ])
+        else:
+            lines.append("No workloads with headroom found. The look-ahead oracle matches the best static\n"
+                         "config on all workloads — there is no room for adaptive improvement.\n\n")
     else:
         lines.append("No existing results found. Run benchmarks first.\n")
 
@@ -562,13 +615,20 @@ def generate_report(
     # Dynamic thesis based on results
     thesis_points = []
 
-    if crossover is not None:
+    if crossover is not None and crossover > 0.0:
         thesis_points.append(
             f"- **Adaptive reconfiguration provides a measurable advantage when workload "
             f"heterogeneity exceeds {crossover:.2f} (measured as optimal-config-switch "
             f"probability). Below this threshold, a single static configuration is optimal "
             f"because the workload is homogeneous enough that the fixed config matches "
             f"the optimal for most traces."
+        )
+    elif crossover is not None and crossover == 0.0:
+        thesis_points.append(
+            "- **On synthetic workloads with well-separated config classes**, adaptive "
+            "agents beat static at ALL heterogeneity levels. Each workload class maps to "
+            "a clearly different optimal accelerator config, so even minimal switching "
+            "creates an advantage. This is a best-case scenario for adaptation."
         )
 
     if rc_crossover:
@@ -598,12 +658,22 @@ def generate_report(
 
     if valid_gaps:
         mean_gap = float(np.mean([g["gap"] for g in valid_gaps]))
-        thesis_points.append(
-            f"- **Adaptive agents capture {mean_gap*100:.0f}% of the available headroom** "
-            f"over static on average (measured by oracle gap). The remaining headroom is lost "
-            f"to exploration overhead and learning latency, not to fundamental limitations "
-            f"of the approach."
-        )
+        if mean_gap >= 0:
+            thesis_points.append(
+                f"- **Adaptive agents capture {mean_gap*100:.0f}% of the available headroom** "
+                f"over static on average (measured by oracle gap). The remaining headroom is lost "
+                f"to exploration overhead and learning latency, not to fundamental limitations "
+                f"of the approach."
+            )
+        else:
+            thesis_points.append(
+                f"- **Adaptive agents score below the best static on average** "
+                f"(mean oracle gap = {mean_gap:.3f}). Even though the look-ahead oracle shows "
+                f"genuine headroom exists on some workloads, learning agents' exploration "
+                f"overhead and slow convergence outweigh the potential benefit. This suggests "
+                f"the learning algorithms (tabular Q-learning, neural bandit) need improvement "
+                f"more than the hardware design does."
+            )
 
     thesis_points.append(
         "- **On homogeneous workloads (llm_decode type)**, no adaptive agent beats the best "
@@ -664,8 +734,8 @@ def main() -> None:
 
     multi_seed: dict[str, dict] = {}
     for wl_name, agents in [
-        ("mixed_production", ["tabular", "smart_static", "static_3", "oracle"]),
-        ("llm_decode", ["tabular", "smart_static", "static_3", "oracle"]),
+        ("mixed_production", ["tabular", "ucb", "smart_static", "static_3", "oracle", "lookahead"]),
+        ("llm_decode", ["tabular", "ucb", "smart_static", "static_3", "oracle", "lookahead"]),
     ]:
         print(f"  Running {wl_name} with {agents}...")
         ms_data = run_multi_seed_analysis(wl_name, agents, n_seeds=15)

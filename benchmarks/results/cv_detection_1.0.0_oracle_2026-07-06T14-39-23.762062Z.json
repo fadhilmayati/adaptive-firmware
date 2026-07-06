@@ -1,0 +1,26 @@
+{
+  "agent_config": {
+    "energy_weight": 0.15
+  },
+  "agent_name": "oracle",
+  "avg_reward": 0.645810040446678,
+  "cache_hit_rate": 0.8333333333333334,
+  "config_usage": {
+    "2": 6
+  },
+  "final_policy": {
+    "balanced": 2,
+    "compute_bound": 0,
+    "memory_bound": 1,
+    "unknown": 2
+  },
+  "n_traces": 6,
+  "run_time_seconds": 8.916854858398438e-05,
+  "suite_version": "0.1.0",
+  "timestamp": "2026-07-06T14:39:23.762062Z",
+  "total_energy_mj": 1.166434816,
+  "total_reconfig_time_ms": 5.0,
+  "total_time_ms": 5.034258346666667,
+  "workload_name": "cv_detection",
+  "workload_version": "1.0.0"
+}
